@@ -1,0 +1,251 @@
+---
+description: Testing strategy and requirements for {project}
+globs: 
+alwaysApply: false
+---
+
+# 0. 核心原则 ⚠️
+- action: "声明总则与测试范围"
+  rules:
+    - "专注测试项目'增量'功能，不重复测试第三方库本身"
+    - "根据组件/模块类型采用差异化测试策略"
+    - "最小化Mock，仅Mock外部依赖：API/localStorage/时间/随机数"
+    - "优先测试用户交互和业务流程，而非实现细节"
+    - "统一使用Vitest + @testing-library"
+  coverage_targets:
+    - "工具函数: 90%+"
+    - "UI组件: 75%+"
+    - "业务组件: 80%+"  
+    - "页面组件: 70%+"
+
+# 1. 分析阶段 —— 功能清单
+- action: "阅读源代码并输出 ## 功能清单"
+  rules:
+    - "识别模块类型：[工具函数/UI组件/业务组件/页面组件]"
+    - "列出公开接口：props/methods/events/exports"
+    - "分析核心功能和业务逻辑"
+    - "识别外部依赖：API/Store/Router/第三方库"
+    - "智能识别项目特性：权限控制/国际化/状态管理等"
+    - "识别需要测试的关键场景"
+  template: |
+    ## 功能清单
+    **模块类型**: [工具函数/UI组件/业务组件/页面组件]
+    **核心功能**:
+    - 功能1: [具体描述]
+    - 功能2: [具体描述]
+    **外部依赖**:
+    - API调用: [列出具体接口]
+    - 状态管理: [Redux/Vuex/Pinia状态]
+    - 路由: [路由跳转相关]
+    **项目特性**:
+    - 权限控制: [智能识别权限组件和验证函数]
+    - 国际化: [i18n相关功能]
+    - 其他特性: [自动识别的项目特定功能]
+    **关键测试场景**:
+    - 正常流程: [主要使用路径]
+    - 异常处理: [错误和边界情况]
+    - 交互验证: [用户操作响应]
+
+# 2. 测试设计阶段 —— 测试矩阵
+- action: "根据功能清单生成 ## 测试矩阵"
+  template: |
+    ## 测试矩阵
+    | 功能点 | 测试类型 | 正常场景 | 边界/异常 | 交互/副作用 | Mock需求 | 优先级 |
+    |-------|---------|----------|-----------|------------|----------|--------|
+    | 功能1  | 单元     | 描述     | 描述      | 描述       | 是/否     | P0/P1/P2 |
+  rules:
+    - "每个核心功能都需覆盖：正常、异常、交互三个维度"
+    - "明确Mock需求和Mock对象"
+    - "标注优先级：P0(核心) > P1(重要) > P2(边缘)"
+    - "UI组件需要快照测试验证结构和样式"
+
+# 3. 生成推荐Prompt —— 中间确认步骤
+- action: "基于功能清单和测试矩阵，生成标准化的测试代码生成指令"
+  note: "🚨 这是中间步骤，生成后暂停等待用户确认，不要立即进行代码生成"
+  
+  template: |
+    ## 推荐测试生成Prompt
+    
+    基于上述分析，为 [组件名] 生成 Vitest 测试代码。这是一个[模块类型]，需要全面测试以下功能：
+    
+    [从测试矩阵中提取的核心测试点，按优先级排列]
+    
+    请确保覆盖率达到[根据模块类型设定]以上，重点关注[关键业务逻辑或复杂交互]。
+    
+    ---
+    **请用户确认上述分析和测试重点是否准确，确认后可复制上述Prompt继续生成测试代码。**
+  
+  rules:
+    - "根据模块类型自动设置覆盖率要求"
+    - "突出强调核心业务逻辑和复杂场景"
+    - "明确指出需要特别关注的测试点"
+    - "生成Prompt后暂停，等待用户确认"
+    - "为用户提供清晰的下一步操作指引"
+
+# 4. 代码生成阶段 —— 生成测试文件
+- action: "输出完整Vitest测试代码"
+  template: |
+    ```typescript
+    // ComponentName.test.tsx
+    import { render, screen, fireEvent, waitFor } from '@testing-library/[react|vue]';
+    import userEvent from '@testing-library/user-event';
+    import { vi } from 'vitest';
+    
+    // 根据项目调整导入
+    import { ComponentName } from './ComponentName';
+    
+    // 测试工具函数
+    const renderComponent = (props = {}) => {
+      const defaultProps = {
+        // 默认props
+      };
+      return render(<ComponentName {...defaultProps} {...props} />);
+    };
+    
+    describe('ComponentName', () => {
+      beforeEach(() => {
+        vi.clearAllMocks();
+      });
+      
+      describe('基础渲染测试', () => {
+        it('正确渲染组件', () => {
+          renderComponent();
+          expect(screen.getByTestId('component-container')).toBeInTheDocument();
+        });
+      });
+      
+      describe('交互功能测试', () => {
+        it('用户操作触发正确行为', async () => {
+          const mockHandler = vi.fn();
+          const user = userEvent.setup();
+          
+          renderComponent({ onAction: mockHandler });
+          
+          await user.click(screen.getByRole('button', { name: '操作' }));
+          
+          expect(mockHandler).toHaveBeenCalledWith(expectedArgs);
+        });
+      });
+      
+      describe('边界条件测试', () => {
+        it('处理空数据状态', () => {
+          renderComponent({ data: [] });
+          expect(screen.getByText('暂无数据')).toBeInTheDocument();
+        });
+      });
+    });
+    ```
+  rules:
+    - "使用TypeScript编写测试"
+    - "结构：describe > describe(功能分组) > it，命名直观"
+    - "异步逻辑使用await + waitFor，确保稳定"
+    - "提供renderComponent工具函数"
+    - "根据识别的技术栈自动生成对应语法"
+
+# 5. 测试用例组织最佳实践 ⭐
+- action: "按功能模块组织测试用例"
+  standard_groups:
+    - "基础渲染测试: 组件挂载、默认状态、快照"
+    - "Props测试: 不同props组合的行为"
+    - "交互功能测试: 用户操作和事件处理"
+    - "状态管理测试: 内部状态变化和同步"
+    - "异步操作测试: API调用、加载状态等"
+    - "边界条件测试: 空数据、错误状态、极值"
+    - "权限控制测试: 有权限/无权限场景"
+    - "表单验证测试: 验证规则和错误提示"
+
+# 6. 选择器策略
+- action: "使用稳定的选择器进行元素查找"
+  priority: "data-testid > role > text content > CSS class"
+  rules:
+    - "优先使用语义化查询方法"
+    - "为关键交互元素添加data-testid"
+    - "避免脆弱的CSS选择器(nth-child)"
+  examples: |
+    ✅ 推荐:
+    screen.getByRole('button', { name: '提交' })
+    screen.getByLabelText('用户名')
+    screen.getByTestId('user-form')
+    
+    ❌ 避免:
+    container.querySelector('.ant-btn:nth-child(2)')
+    container.querySelector('div > span')
+
+# 7. 异步操作测试
+- action: "正确处理异步操作和状态更新"
+  rules:
+    - "使用waitFor等待状态更新"
+    - "使用findBy*查询异步出现的元素"
+    - "避免setTimeout等不稳定等待"
+    - "Mock API请求确保测试稳定性"
+  template: |
+    it('异步操作测试', async () => {
+      const mockApi = vi.fn().mockResolvedValue(mockData);
+      
+      renderComponent();
+      fireEvent.click(screen.getByRole('button', { name: '加载' }));
+      
+      await waitFor(() => {
+        expect(screen.getByText('加载完成')).toBeInTheDocument();
+      });
+    });
+
+# 8. Mock策略
+- action: "合理使用Mock，避免过度模拟"
+  should_mock:
+    - "外部API请求"
+    - "浏览器API(localStorage/sessionStorage)"
+    - "时间相关函数(Date.now/setTimeout)"
+    - "随机数生成"
+    - "第三方库的副作用"
+  should_not_mock:
+    - "被测试组件的内部逻辑"
+    - "基础组件库的行为"
+    - "简单的计算函数"
+  template: |
+    // API Mock
+    const mockApi = vi.spyOn(ApiService, 'getData');
+    mockApi.mockResolvedValue(mockResponse);
+    
+    // 时间Mock
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2023-01-01'));
+
+# 9. 边界条件检查清单
+- action: "确保覆盖所有边界情况"
+  boundaries:
+    - "✅ 空数据状态 ([], null, undefined)"
+    - "✅ 最大值边界 (超出范围输入)"
+    - "✅ 最小值边界 (负数、零值)"
+    - "✅ 无效输入 (NaN, 非法格式)"
+    - "✅ 禁用状态下的交互"
+    - "✅ Props变化时的状态同步"
+    - "✅ 网络错误处理"
+    - "✅ 权限不足时的行为"
+    - "✅ 会话过期处理"
+
+# 10. 测试文件组织
+- action: "统一测试文件命名与结构"
+  rules:
+    - "扩展名: .test.ts/.test.tsx"
+    - "位置: 与源文件同级目录"
+    - "命名: [filename].test.[ext]"
+    - "工具函数测试: utils/__tests__/"
+    - "页面组件测试: pages/__tests__/"
+
+# 11. 完成检查清单
+- action: "分阶段验证完成情况"
+  
+  analysis_phase:
+    - "✅ 已输出## 功能清单"
+    - "✅ 已输出## 测试矩阵"  
+    - "✅ 已输出## 推荐测试生成Prompt"
+  
+  code_generation_phase:
+    - "✅ 已输出完整测试代码"
+    - "✅ 覆盖率达到设定目标"
+    - "✅ 测试用例按功能模块组织"
+    - "✅ 使用稳定选择器策略"
+    - "✅ 正确处理异步操作"
+    - "✅ 合理使用Mock策略"
+    - "✅ 覆盖所有边界条件"

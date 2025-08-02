@@ -1,11 +1,17 @@
 {
-    "name": "@nsea/starter",
-    "version": "0.0.0",
-    "description": "",
+    "name": "pilot",
+    "version": "0.1.0",
+    "description": "🚀 可扩展的前端项目开发体验增强平台 - 智能检测项目技术栈，自动配置开发环境",
     "keywords": [
-        "lib",
-        "xmind",
-        "praser"
+        "cli",
+        "frontend",
+        "development",
+        "testing",
+        "vitest",
+        "react",
+        "vue",
+        "automation",
+        "configuration"
     ],
     "publishConfig": {
         "access": "public",
@@ -13,7 +19,7 @@
     },
     "packageManager": "pnpm@10.2.1",
     "bin": {
-        "starter": "bin/starter.js"
+        "pilot": "bin/pilot.js"
     },
     "main": "dist/index.js",
     "exports": {
@@ -22,38 +28,48 @@
             "require": "./dist/index.cjs"
         }
     },
-    "homepage": "https://github.com/NorthSeacoder/lib-starter/README.md",
+    "homepage": "https://github.com/your-org/pilot#readme",
     "bugs": {
-        "url": "https://github.com/NorthSeacoder/lib-starter/issues"
+        "url": "https://github.com/your-org/pilot/issues"
     },
     "author": "NorthSeacoder",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/NorthSeacoder/lib-starter.git"
+        "url": "git+https://github.com/your-org/pilot.git"
     },
     "license": "MIT",
     "files": [
         "dist",
-        "bin"
+        "bin",
+        "templates"
     ],
     "type": "module",
     "devDependencies": {
         "@antfu/ni": "^23.3.1",
         "@arethetypeswrong/cli": "^0.15.4",
+        "@testing-library/jest-dom": "^6.6.4",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/fs-extra": "^11.0.4",
+        "@types/inquirer": "^8.2.10",
         "@types/node": "^22.13.8",
+        "@vitest/ui": "^3.2.4",
         "bumpp": "^10.0.3",
         "commitizen": "^4.3.1",
         "cz-conventional-changelog": "^3.3.0",
         "esbuild-visualizer": "^0.7.0",
+        "jsdom": "^26.1.0",
         "rimraf": "^6.0.1",
         "tsup": "^8.2.4",
+        "tsx": "^4.20.0",
         "typescript": "^5.5.4",
-        "vitest": "^2.0.5"
+        "vitest": "^2.1.9"
     },
     "scripts": {
         "cz": "git add . && git-cz",
         "clean": "rimraf dist stats.html",
-        "start": "esno src/cli/run.ts",
+        "dev": "tsx src/cli/run.ts",
+        "start": "node bin/pilot.js",
         "build": "nr clean && tsup",
         "analyze": "nr clean && tsup --metafile && esbuild-visualizer --metadata ./dist/metafile-*.json --open",
         "lint": "tsc",
@@ -67,7 +83,16 @@
         "release": "pwd && bumpp && npm publish"
     },
     "dependencies": {
-        "cac": "^6.7.14"
+        "boxen": "^7.1.1",
+        "chalk": "^4.1.2",
+        "commander": "^11.1.0",
+        "cosmiconfig": "^8.3.6",
+        "execa": "^7.2.0",
+        "find-up": "^6.3.0",
+        "fs-extra": "^11.2.0",
+        "glob": "^10.3.10",
+        "inquirer": "^9.2.12",
+        "ora": "^6.3.1"
     },
     "config": {
         "commitizen": {

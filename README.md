@@ -1,124 +1,166 @@
-# Starter Template for NPM Libraries
+# Pilot - 前端项目增强工具
 
-这是一个用于创建新NPM库的起始模板，包含常用配置和工具函数。
+> 🚀 可扩展的前端项目开发体验增强平台
 
-This is a starter template for creating new NPM libraries, containing common configurations and utility functions.
+Pilot 是一个参考 Astro `astro add` 设计理念的命令行工具，为前端项目提供模块化的开发体验增强。通过智能检测项目技术栈和架构，自动安装相应依赖，生成最佳实践配置，让开发者快速获得高质量的开发环境。
 
-## 技术栈 / Tech Stack
+## ✨ 核心特性
 
-- TypeScript
-- Vitest (用于测试 / for testing)
-- tsup (用于构建 / for building)
-- ESLint (用于代码规范 / for code linting)
-- CAC (用于命令行解析 / for command-line parsing)
+- **🔍 智能检测**：自动识别 React/Vue2/Vue3 技术栈和项目架构
+- **🔧 模块化设计**：插件化架构，按需添加功能模块
+- **⚡ 一键配置**：零配置体验，自动安装依赖和生成配置文件
+- **🤖 AI 增强**：集成企业级 AI 开发规则和最佳实践
+- **📦 渐进增强**：支持单项配置和完整配置，适应不同使用场景
+- **🛡️ 安全可靠**：完整的错误处理和回滚机制
 
-## 特性 / Features
+## 🏗️ 技术栈
 
-- 支持TypeScript
-- 支持注册命令行工具 (bin)
-- 内置测试配置
-- 支持NPM发布
-- 包含基本的工具函数
-- 支持多种输出格式 (CJS, ESM)
-- 包含错误处理和参数解析
+- **核心**: TypeScript + Commander.js
+- **测试**: Vitest + @testing-library
+- **构建**: tsup (ESM + CJS)
+- **用户体验**: Chalk + Ora + Boxen
+- **文件操作**: fs-extra + glob + find-up
+- **进程管理**: execa
 
-- TypeScript support
-- CLI tool registration support (bin)
-- Built-in test configuration
-- NPM publishing support
-- Basic utility functions included
-- Support for multiple output formats (CJS, ESM)
-- Includes error handling and argument parsing
+## 🚀 快速开始
 
-## 使用方法 / Usage
+### 安装
 
-1. clone 这个项目 或 use this template / Clone this project or use this template
-2. 修改 `package.json` 中的项目信息 / Modify project info in `package.json`
-3. 在 `src` 目录下开发你的库 / Develop your library in the `src` directory
-4. 使用 `npm run build` 构建项目 / Build the project using `npm run build`
-5. 使用 `npm run release` 发布新版本 / Use `npm run release` to publish new versions
+```bash
+npm install -g pilot
+# 或
+npx pilot@latest
+```
 
-## 开发 / Development
+### 基础使用
 
-主要开发文件：
-- `src/index.ts`: 库的主入口
-- `src/cli/index.ts`: CLI工具的入口
-- `src/types/`: 类型定义
-- `src/utils.ts`: 工具函数
+```bash
+# 完整测试配置（推荐，自动检测项目类型）
+pilot add testing
 
-Main development files:
-- `src/index.ts`: Main entry of the library
-- `src/cli/index.ts`: Entry for CLI tools
-- `src/types/`: Type definitions
-- `src/utils.ts`: Utility functions
+# 分步配置
+pilot add testing --rules      # 仅添加 AI 测试规则
+pilot add testing --config     # 仅添加 Vitest 配置  
+pilot add testing --deps       # 仅安装测试依赖
+```
 
-## 测试 / Testing
+### 高级用法
 
-运行 `npm test` 来执行测试。测试文件应放在 `src` 目录中，并以 `.test.ts` 结尾。
+```bash
+# 预览模式（查看将要生成的配置）
+pilot add testing --dry-run
 
-Run `npm test` to execute tests. Test files should be placed in the `src` directory and end with `.test.ts`.
+# 跳过依赖安装（仅生成配置文件）
+pilot add testing --no-install
 
-## 构建 / Building
+# 覆盖自动检测（仅在检测失败时使用）
+pilot add testing --stack vue3 --arch pnpm
+```
 
-使用 `npm run build` 构建项目。这将生成 CJS 和 ESM 格式的输出文件。
+## 📋 支持的项目类型
 
-Use `npm run build` to build the project. This will generate output files in both CJS and ESM formats.
+### 技术栈支持
+- **React**: Create React App, Vite, Next.js
+- **Vue3**: Vite, Vue CLI, Nuxt3  
+- **Vue2**: Vue CLI, 自定义 Webpack 配置
 
-## 发布 / Publishing
+### 项目架构支持
+- **单模块项目**: 标准的单个 package.json 项目结构
+- **pnpm workspace**: 通过 `pnpm-workspace.yaml` 检测和配置
+- **Yarn workspace**: 通过 `package.json` 的 workspaces 字段检测和配置
 
-1. 在根目录执行发布脚本 / Run the release script in the root directory: `npm run release`
+## 🛠️ 开发指南
 
-注意：发布脚本会自动处理版本更新、构建和发布过程。由于已设置 `publishConfig`，无需手动设置 npm 源。
+### 项目结构
+```
+src/
+├── cli/                  # CLI 入口和命令解析
+├── core/                 # 核心功能模块
+│   ├── detection/        # 项目检测逻辑
+│   └── module-manager.ts # 模块管理器
+├── modules/              # 功能模块
+│   └── testing/          # 测试模块
+│       ├── installer.ts  # 模块安装器
+│       ├── config-generator.ts  # 配置生成器
+│       └── templates/    # 配置模板
+├── types/                # TypeScript 类型定义
+└── utils.ts             # 工具函数
+```
 
-Note: The release script will automatically handle version updating, building, and publishing processes. As `publishConfig` is already set, there's no need to manually set the npm registry.
+### 本地开发
+```bash
+# 克隆项目
+git clone https://github.com/your-org/pilot
+cd pilot
 
-注意：发布前请确保已经登录到npm。
+# 安装依赖
+pnpm install
 
-Note: Make sure you're logged in to npm before publishing.
+# 开发模式
+pnpm dev
 
-## 命令行工具 / CLI Tool
+# 构建
+pnpm build
 
-此模板包含一个基本的命令行工具结构。主要文件：
-- `bin/starter.js`: CLI入口点
-- `src/cli/index.ts`: CLI主逻辑
-- `src/cli/parse-args.ts`: 参数解析
+# 测试
+pnpm test
+```
 
-This template includes a basic CLI tool structure. Main files:
-- `bin/starter.js`: CLI entry point
-- `src/cli/index.ts`: Main CLI logic
-- `src/cli/parse-args.ts`: Argument parsing
+## 🎯 当前功能
 
-## 配置文件 / Configuration Files
+### V1.0 MVP - Testing 模块
+- ✅ 项目技术栈自动检测（React/Vue2/Vue3）
+- ✅ 项目架构检测（单模块/pnpm workspace/yarn workspace）
+- ✅ AI 测试规则文件生成（.cursorrules）
+- ✅ Vitest 基础配置生成
+- ✅ 测试依赖自动安装
+- ✅ 配置文件验证和测试
 
-- `tsconfig.json`: TypeScript配置
-- `tsup.config.ts`: 构建配置
+### 🚧 规划中功能
+- **Linting 模块**: ESLint + 企业规则
+- **Formatting 模块**: Prettier + 统一配置
+- **Git Hooks 模块**: Husky + lint-staged
 
-- `tsconfig.json`: TypeScript configuration
-- `tsup.config.ts`: Build configuration
+## 🧪 示例用法
 
-## 脚本说明 / Script Descriptions
+添加测试配置到 React 项目：
+```bash
+cd my-react-app
+pilot add testing
+```
 
-- `build`: 构建项目 / Build the project
-- `lint`: 运行TypeScript类型检查 / Run TypeScript type checking
-- `test`: 运行测试 / Run tests
-- `format`: 格式化代码 / Format code
-- `check-format`: 检查代码格式 / Check code formatting
-- `check-exports`: 检查导出 / Check exports
-- `ci`: 运行CI检查 / Run CI checks
-- `release`: 发布新版本 / Release a new version
+输出示例：
+```
+🚀 Pilot
+前端项目开发体验增强平台
 
-## 依赖说明 / Dependencies
+版本: 0.1.0
 
-主要依赖包括：
-- `cac`: 命令行参数解析
-- 其他开发依赖参见根目录 `package.json`
+✅ 检测完成: react + single
+📦 开始配置测试环境...
+✅ 生成 AI 测试规则文件
+✅ 生成 Vitest 配置文件
+✅ 安装测试依赖
 
-Main dependencies include:
-- `cac`: Command-line argument parsing
-- See root `package.json` for other dev dependencies
+🎉 测试环境配置完成!
 
-## 许可证 / License
+📝 后续步骤:
+  1. 运行 npm test 执行测试
+  2. 查看 .cursorrules 了解 AI 测试规则
+  3. 在 src 目录创建 *.test.ts 文件开始编写测试
+```
 
-请查看 `LICENSE` 文件。
+## 🤝 贡献指南
 
-Please see the `LICENSE` file.
+我们欢迎所有形式的贡献！请查看 [贡献指南](CONTRIBUTING.md) 了解详细信息。
+
+## 📜 许可证
+
+MIT License - 详见 [LICENSE](./LICENSE) 文件
+
+---
+
+**⭐ 如果这个项目对你有帮助，请给我们一个 Star！**
+
+**🐛 遇到问题？** [提交 Issue](https://github.com/your-org/pilot/issues)  
+**💬 交流讨论？** [加入我们的讨论](https://github.com/your-org/pilot/discussions)
