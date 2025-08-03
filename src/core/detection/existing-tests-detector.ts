@@ -1,0 +1,119 @@
+import path from 'node:path'
+import { pathExists } from 'fs-extra'
+import { readFile } from 'node:fs/promises'
+import { glob } from 'glob'
+import type { ExistingConfig } from '../../types'
+
+/**
+ * 检测现有的测试配置和框架
+ */
+export async function detectExistingTests(rootDir: string, packageJson: any): Promise<{
+  hasExistingTests: boolean
+  existingTestFrameworks: string[]
+  existingConfigs: ExistingConfig[]
+}> {
+  const dependencies = {
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  }
+
+  const existingTestFrameworks: string[] = []
+  const existingConfigs: ExistingConfig[] = []
+
+  // 检测测试框架依赖
+  const testFrameworks = {
+    vitest: 'vitest',
+    jest: 'jest',
+    '@testing-library/react': 'testing-library',
+    '@testing-library/vue': 'testing-library',
+    '@testing-library/jest-dom': 'testing-library',
+    mocha: 'mocha',
+    jasmine: 'jasmine',
+    karma: 'karma',
+    cypress: 'cypress',
+    playwright: 'playwright',
+    '@playwright/test': 'playwright',
+  }
+
+  for (const [dep, framework] of Object.entries(testFrameworks)) {
+    if (dependencies[dep] && !existingTestFrameworks.includes(framework)) {
+      existingTestFrameworks.push(framework)
+    }
+  }
+
+  // 检测配置文件
+  const configFiles = [
+    { pattern: 'vitest.config.*', type: 'vitest' as const },
+    { pattern: 'vite.config.*', type: 'vitest' as const },
+    { pattern: 'jest.config.*', type: 'jest' as const },
+    { pattern: 'jest.setup.*', type: 'jest' as const },
+    { pattern: 'test-setup.*', type: 'custom' as const },
+    { pattern: 'setupTests.*', type: 'custom' as const },
+  ]
+
+  for (const { pattern, type } of configFiles) {
+    const files = await glob(pattern, { cwd: rootDir })
+    for (const file of files) {
+      const filePath = path.join(rootDir, file)
+      try {
+        const content = await readFile(filePath, 'utf-8')
+        existingConfigs.push({
+          type,
+          filePath,
+          content,
+          conflicts: [], // Will be populated later during conflict analysis
+        })
+      } catch {
+        // Ignore read errors
+      }
+    }
+  }
+
+  // 检测 package.json 中的内联配置
+  if (packageJson.vitest) {
+    existingConfigs.push({
+      type: 'vitest',
+      filePath: path.join(rootDir, 'package.json'),
+      content: packageJson.vitest,
+      conflicts: [],
+    })
+  }
+
+  if (packageJson.jest) {
+    existingConfigs.push({
+      type: 'jest',
+      filePath: path.join(rootDir, 'package.json'),
+      content: packageJson.jest,
+      conflicts: [],
+    })
+  }
+
+  // 检测测试文件
+  const testPatterns = [
+    '**/*.test.*',
+    '**/*.spec.*',
+    '**/test/**/*.*',
+    '**/tests/**/*.*',
+    '**/__tests__/**/*.*',
+  ]
+
+  let hasTestFiles = false
+  for (const pattern of testPatterns) {
+    const files = await glob(pattern, { 
+      cwd: rootDir,
+      ignore: ['node_modules/**', 'dist/**', 'build/**']
+    })
+    if (files.length > 0) {
+      hasTestFiles = true
+      break
+    }
+  }
+
+  const hasExistingTests = existingTestFrameworks.length > 0 || existingConfigs.length > 0 || hasTestFiles
+
+  return {
+    hasExistingTests,
+    existingTestFrameworks,
+    existingConfigs,
+  }
+}

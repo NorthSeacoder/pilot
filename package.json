@@ -52,6 +52,7 @@
         "@testing-library/user-event": "^14.6.1",
         "@types/fs-extra": "^11.0.4",
         "@types/inquirer": "^8.2.10",
+        "@types/js-yaml": "^4.0.9",
         "@types/node": "^22.13.8",
         "@vitest/ui": "^3.2.4",
         "bumpp": "^10.0.3",
@@ -92,6 +93,7 @@
         "fs-extra": "^11.2.0",
         "glob": "^10.3.10",
         "inquirer": "^9.2.12",
+        "js-yaml": "^4.1.0",
         "ora": "^6.3.1"
     },
     "config": {

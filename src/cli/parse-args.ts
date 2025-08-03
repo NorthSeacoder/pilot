@@ -17,7 +17,7 @@ export interface ParsedArgs {
  * 解析命令行参数
  */
 export async function parseArgs(argv = process.argv): Promise<ParsedArgs> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     try {
       const program = new Command()
 

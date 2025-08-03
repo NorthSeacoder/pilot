@@ -14,6 +14,78 @@ export type ProjectArchitecture = 'single' | 'pnpm-workspace' | 'yarn-workspace'
 export type Module = 'testing' | 'linting' | 'formatting'
 
 /**
+ * 工作区包信息
+ */
+export interface WorkspacePackage {
+  /** 包名 */
+  name: string
+  /** 包路径 */
+  path: string
+  /** package.json 内容 */
+  packageJson: any
+  /** 技术栈 */
+  techStack: TechStack
+}
+
+/**
+ * 工作区信息
+ */
+export interface WorkspaceInfo {
+  /** 工作区类型 */
+  type: 'pnpm' | 'yarn'
+  /** 工作区包列表 */
+  packages: WorkspacePackage[]
+  /** 根目录 package.json */
+  rootPackageJson: any
+  /** 当前执行位置 */
+  currentLocation: 'root' | 'package'
+  /** 当前包信息（如果在包内执行） */
+  currentPackage?: WorkspacePackage
+}
+
+/**
+ * 现有配置信息
+ */
+export interface ExistingConfig {
+  /** 配置类型 */
+  type: 'vitest' | 'jest' | 'testing-library' | 'custom'
+  /** 文件路径 */
+  filePath: string
+  /** 配置内容 */
+  content: any
+  /** 冲突项 */
+  conflicts: string[]
+}
+
+/**
+ * 版本兼容性信息
+ */
+export interface VersionCompatibility {
+  /** React 版本 */
+  react?: string
+  /** Vue 版本 */
+  vue?: string
+  /** TypeScript 版本 */
+  typescript?: string
+  /** 兼容的 Testing Library 版本 */
+  compatibleTestingLibrary?: string
+  /** 兼容的 Vitest 版本 */
+  compatibleVitest?: string
+}
+
+/**
+ * 错误处理上下文信息
+ */
+export interface ErrorContext {
+  /** 操作名称 */
+  operation: string
+  /** 文件路径（可选） */
+  filePath?: string
+  /** 详细信息（可选） */
+  details?: Record<string, any>
+}
+
+/**
  * 项目检测结果
  */
 export interface ProjectDetection {
@@ -25,6 +97,22 @@ export interface ProjectDetection {
   rootDir: string
   /** 包管理器 */
   packageManager: 'npm' | 'yarn' | 'pnpm'
+  /** 是否为 TypeScript 项目 */
+  isTypeScript: boolean
+  /** 是否已有测试配置 */
+  hasExistingTests: boolean
+  /** 现有测试框架 */
+  existingTestFrameworks: string[]
+  /** 工作区信息（如果适用） */
+  workspaceInfo?: WorkspaceInfo
+  /** 依赖版本信息 */
+  dependencyVersions: Record<string, string>
+  /** 现有配置列表 */
+  existingConfigs: ExistingConfig[]
+  /** 当前执行目录 */
+  currentDir: string
+  /** Node.js 版本 */
+  nodeVersion: string
 }
 
 /**

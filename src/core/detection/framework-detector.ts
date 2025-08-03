@@ -3,7 +3,7 @@ import type { TechStack } from '../../types'
 /**
  * 检测项目使用的前端框架
  */
-export async function detectFramework(packageJson: any, rootDir: string): Promise<TechStack> {
+export async function detectFramework(packageJson: any): Promise<TechStack> {
   const dependencies = {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
