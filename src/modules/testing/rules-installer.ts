@@ -1,5 +1,5 @@
 import { copyFile, mkdir } from 'fs/promises'
-import { join, dirname } from 'path'
+import { join } from 'path'
 import { existsSync } from 'fs'
 
 export class RulesInstaller {

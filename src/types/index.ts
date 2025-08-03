@@ -74,6 +74,72 @@ export interface VersionCompatibility {
 }
 
 /**
+ * 依赖规格定义
+ */
+export interface DependencySpec {
+  name: string
+  version?: string
+  dev: boolean
+  peer?: boolean
+  optional?: boolean
+}
+
+/**
+ * 冲突报告
+ */
+export interface ConflictReport {
+  hasConflicts: boolean
+  conflicts: ConflictInfo[]
+  resolutions: ConflictResolution[]
+}
+
+/**
+ * 冲突信息
+ */
+export interface ConflictInfo {
+  dependency: string
+  existingVersion: string
+  requiredVersion: string
+  severity: 'error' | 'warning' | 'info'
+  description: string
+}
+
+/**
+ * 冲突解决方案
+ */
+export interface ConflictResolution {
+  type: 'upgrade' | 'downgrade' | 'replace' | 'skip'
+  dependency: string
+  fromVersion: string
+  toVersion: string
+  reason: string
+}
+
+/**
+ * 依赖分析结果
+ */
+export interface DependencyAnalysis {
+  existingDependencies: Record<string, string>
+  conflicts: ConflictReport
+  recommendations: DependencySpec[]
+  compatibilityMatrix: CompatibilityMatrix
+}
+
+/**
+ * 兼容性矩阵
+ */
+export interface CompatibilityMatrix {
+  [framework: string]: {
+    [version: string]: {
+      testingLibrary: string
+      vitest: string
+      jsdom: string
+      additionalDeps: DependencySpec[]
+    }
+  }
+}
+
+/**
  * 错误处理上下文信息
  */
 export interface ErrorContext {

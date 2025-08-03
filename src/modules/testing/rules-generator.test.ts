@@ -23,7 +23,13 @@ describe('generateCursorRules', () => {
       architecture: 'single',
       isTypeScript: true,
       hasWorkspace: false,
-      packageManager: 'npm'
+      packageManager: 'npm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateCursorRules(projectInfo, { verbose: false })
@@ -49,7 +55,13 @@ describe('generateCursorRules', () => {
       architecture: 'pnpm-workspace',
       isTypeScript: true,
       hasWorkspace: true,
-      packageManager: 'pnpm'
+      packageManager: 'pnpm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateCursorRules(projectInfo, { verbose: true })

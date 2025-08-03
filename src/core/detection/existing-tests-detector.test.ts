@@ -114,7 +114,7 @@ describe('Existing Tests Detection', () => {
       const { glob } = await import('glob')
       const { readFile } = await import('node:fs/promises')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === 'vitest.config.*') {
           return Promise.resolve(['vitest.config.ts'])
         }
@@ -126,15 +126,15 @@ describe('Existing Tests Detection', () => {
       
       expect(result.hasExistingTests).toBe(true)
       expect(result.existingConfigs).toHaveLength(1)
-      expect(result.existingConfigs[0].type).toBe('vitest')
-      expect(result.existingConfigs[0].filePath).toBe('/test/project/vitest.config.ts')
+      expect(result.existingConfigs[0]?.type).toBe('vitest')
+      expect(result.existingConfigs[0]?.filePath).toBe('/test/project/vitest.config.ts')
     })
 
     it('应该检测 Jest 配置文件', async () => {
       const { glob } = await import('glob')
       const { readFile } = await import('node:fs/promises')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === 'jest.config.*') {
           return Promise.resolve(['jest.config.js'])
         }
@@ -146,7 +146,7 @@ describe('Existing Tests Detection', () => {
       
       expect(result.hasExistingTests).toBe(true)
       expect(result.existingConfigs).toHaveLength(1)
-      expect(result.existingConfigs[0].type).toBe('jest')
+      expect(result.existingConfigs[0]?.type).toBe('jest')
     })
 
     it('应该处理文件读取错误', async () => {
@@ -179,9 +179,9 @@ describe('Existing Tests Detection', () => {
       
       expect(result.hasExistingTests).toBe(true)
       expect(result.existingConfigs).toHaveLength(1)
-      expect(result.existingConfigs[0].type).toBe('vitest')
-      expect(result.existingConfigs[0].filePath).toBe('/test/project/package.json')
-      expect(result.existingConfigs[0].content).toEqual({
+      expect(result.existingConfigs[0]?.type).toBe('vitest')
+      expect(result.existingConfigs[0]?.filePath).toBe('/test/project/package.json')
+      expect(result.existingConfigs[0]?.content).toEqual({
         globals: true,
         environment: 'jsdom'
       })
@@ -202,8 +202,8 @@ describe('Existing Tests Detection', () => {
       
       expect(result.hasExistingTests).toBe(true)
       expect(result.existingConfigs).toHaveLength(1)
-      expect(result.existingConfigs[0].type).toBe('jest')
-      expect(result.existingConfigs[0].content).toEqual({
+      expect(result.existingConfigs[0]?.type).toBe('jest')
+      expect(result.existingConfigs[0]?.content).toEqual({
         testEnvironment: 'node',
         collectCoverage: true
       })
@@ -214,7 +214,7 @@ describe('Existing Tests Detection', () => {
     it('应该检测 .test. 模式的测试文件', async () => {
       const { glob } = await import('glob')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === '**/*.test.*') {
           return Promise.resolve(['src/utils.test.ts', 'tests/api.test.js'])
         }
@@ -229,7 +229,7 @@ describe('Existing Tests Detection', () => {
     it('应该检测 .spec. 模式的测试文件', async () => {
       const { glob } = await import('glob')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === '**/*.spec.*') {
           return Promise.resolve(['src/component.spec.ts'])
         }
@@ -244,7 +244,7 @@ describe('Existing Tests Detection', () => {
     it('应该检测 __tests__ 目录中的文件', async () => {
       const { glob } = await import('glob')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === '**/__tests__/**/*.*') {
           return Promise.resolve(['src/__tests__/helper.js'])
         }
@@ -259,7 +259,7 @@ describe('Existing Tests Detection', () => {
     it('应该忽略 node_modules 和构建目录', async () => {
       const { glob } = await import('glob')
       
-      vi.mocked(glob).mockImplementation((pattern: string, options: any) => {
+      vi.mocked(glob).mockImplementation((_pattern: string | string[], options: any) => {
         if (options?.ignore) {
           expect(options.ignore).toContain('node_modules/**')
           expect(options.ignore).toContain('dist/**')
@@ -288,7 +288,7 @@ describe('Existing Tests Detection', () => {
       const { glob } = await import('glob')
       const { readFile } = await import('node:fs/promises')
       
-      vi.mocked(glob).mockImplementation((pattern: string) => {
+      vi.mocked(glob).mockImplementation((pattern: string | string[]) => {
         if (pattern === 'vitest.config.*') {
           return Promise.resolve(['vitest.config.ts'])
         }

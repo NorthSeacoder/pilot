@@ -44,7 +44,7 @@ describe('TypeScript Detection', () => {
 
     it('应该通过 tsconfig.json 检测 TypeScript 项目', async () => {
       const { pathExists } = await import('fs-extra')
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
 
       const packageJson = {}
       
@@ -79,7 +79,7 @@ describe('TypeScript Detection', () => {
 
     it('当没有 TypeScript 标识时应该返回 false', async () => {
       const { pathExists } = await import('fs-extra')
-      vi.mocked(pathExists).mockResolvedValue(false)
+      vi.mocked(pathExists).mockResolvedValue(false as any)
 
       const packageJson = {}
       
@@ -106,7 +106,7 @@ describe('TypeScript Detection', () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile, safeParseJSON } = await import('../../utils/error-handler')
       
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue('{"compilerOptions": {"strict": true}}')
       vi.mocked(safeParseJSON).mockReturnValue({ compilerOptions: { strict: true } })
 
@@ -123,7 +123,7 @@ describe('TypeScript Detection', () => {
 
     it('当 tsconfig.json 不存在时应该返回 null', async () => {
       const { pathExists } = await import('fs-extra')
-      vi.mocked(pathExists).mockResolvedValue(false)
+      vi.mocked(pathExists).mockResolvedValue(false as any)
 
       const result = await getTypeScriptConfig('/test/project')
       
@@ -134,7 +134,7 @@ describe('TypeScript Detection', () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile } = await import('../../utils/error-handler')
       
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue(null)
 
       const result = await getTypeScriptConfig('/test/project')
@@ -146,7 +146,7 @@ describe('TypeScript Detection', () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile, safeParseJSON } = await import('../../utils/error-handler')
       
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue('invalid json')
       vi.mocked(safeParseJSON).mockReturnValue(null)
 

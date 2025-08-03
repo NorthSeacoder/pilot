@@ -62,6 +62,7 @@ export async function detectProject(options: ModuleOptions): Promise<ProjectDete
     rootDir,
     packageManager,
     isTypeScript,
+    hasWorkspace: workspaceInfo !== undefined,
     hasExistingTests,
     existingTestFrameworks,
     workspaceInfo,

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { pathExists } from 'fs-extra'
+// import { pathExists } from 'fs-extra' // 暂时不需要
 import { readFile } from 'node:fs/promises'
 import { glob } from 'glob'
 import type { ExistingConfig } from '../../types'

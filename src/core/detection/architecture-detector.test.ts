@@ -73,7 +73,7 @@ describe('Architecture Detection', () => {
       const { pathExists } = await import('fs-extra')
       const { readFile } = await import('node:fs/promises')
       
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(readFile).mockResolvedValue(JSON.stringify({
         workspaces: ['packages/*']
       }))
@@ -148,7 +148,7 @@ describe('Architecture Detection', () => {
       
       vi.mocked(safeParseJSON).mockReturnValue({ name: 'test-package' })
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/pkg1'])
 
       const yaml = await import('js-yaml')
@@ -180,7 +180,7 @@ describe('Architecture Detection', () => {
       vi.mocked(safeReadFile).mockResolvedValue('{"name": "test-package"}')
       vi.mocked(safeParseJSON).mockReturnValue({ name: 'test-package' })
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/pkg1'])
 
       const { detectFramework } = await import('./framework-detector')
@@ -210,7 +210,7 @@ describe('Architecture Detection', () => {
       
       vi.mocked(safeParseJSON).mockReturnValue({ name: 'test-package' })
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/frontend'])
 
       const yaml = await import('js-yaml')
@@ -248,7 +248,7 @@ describe('Architecture Detection', () => {
       vi.mocked(safeReadFile).mockResolvedValue('{"name": "test-package"}')
       vi.mocked(safeParseJSON).mockReturnValue({ name: 'test-package' })
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue([])
 
       const { detectFramework } = await import('./framework-detector')
@@ -276,7 +276,7 @@ describe('Architecture Detection', () => {
       
       vi.mocked(safeParseJSON).mockReturnValue(null)
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/pkg1'])
 
       const yaml = await import('js-yaml')
@@ -358,7 +358,7 @@ describe('Architecture Detection', () => {
       
       vi.mocked(safeParseJSON).mockReturnValue({}) // 空对象
       vi.mocked(safeAsync).mockImplementation((operation) => operation())
-      vi.mocked(pathExists).mockResolvedValue(true)
+      vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/unnamed-pkg'])
 
       const yaml = await import('js-yaml')
@@ -369,7 +369,7 @@ describe('Architecture Detection', () => {
 
       const result = await detectWorkspaceInfo('/test/project', '/test/project', 'pnpm-workspace')
       
-      expect(result?.packages[0].name).toBe('unnamed-pkg') // 使用目录名作为后备
+      expect(result?.packages[0]?.name).toBe('unnamed-pkg') // 使用目录名作为后备
     })
   })
 })

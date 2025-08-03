@@ -23,7 +23,13 @@ describe('generateVitestConfig', () => {
       architecture: 'single',
       isTypeScript: true,
       hasWorkspace: false,
-      packageManager: 'npm'
+      packageManager: 'npm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateVitestConfig(projectInfo, { verbose: false })
@@ -49,7 +55,13 @@ describe('generateVitestConfig', () => {
       architecture: 'single',
       isTypeScript: true,
       hasWorkspace: false,
-      packageManager: 'pnpm'
+      packageManager: 'pnpm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateVitestConfig(projectInfo, { verbose: true })
@@ -75,7 +87,13 @@ describe('generateVitestConfig', () => {
       architecture: 'pnpm-workspace',
       isTypeScript: true,
       hasWorkspace: true,
-      packageManager: 'pnpm'
+      packageManager: 'pnpm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateVitestConfig(projectInfo, { verbose: false })
@@ -104,7 +122,13 @@ describe('generateVitestConfig', () => {
       architecture: 'single',
       isTypeScript: true,
       hasWorkspace: false,
-      packageManager: 'npm'
+      packageManager: 'npm',
+      hasExistingTests: false,
+      existingTestFrameworks: [],
+      dependencyVersions: {},
+      existingConfigs: [],
+      currentDir: tempDir,
+      nodeVersion: 'v18.17.0'
     }
 
     await generateVitestConfig(projectInfo, { verbose: false })

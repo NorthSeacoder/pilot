@@ -232,8 +232,8 @@ describe('Error Handler Utils', () => {
       const results = await safeBatch(operations)
       
       expect(results).toEqual(['result1', 'result2'])
-      expect(operations[0].operation).toHaveBeenCalledOnce()
-      expect(operations[1].operation).toHaveBeenCalledOnce()
+      expect(operations[0]?.operation).toHaveBeenCalledOnce()
+      expect(operations[1]?.operation).toHaveBeenCalledOnce()
     })
 
     it('应该处理部分操作失败的情况', async () => {
