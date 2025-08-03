@@ -1,0 +1,32 @@
+import { defineConfig } from 'vitest/config'
+{{framework_plugin_import}}
+
+export default defineConfig({
+  plugins: [{{framework_plugin}}],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'dist/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        'coverage/**',
+        '**/*.stories.*',
+        '**/*.test.*',
+      ],
+      thresholds: {
+        global: {
+          branches: {{coverage_threshold}},
+          functions: {{coverage_threshold}},
+          lines: {{coverage_threshold}},
+          statements: {{coverage_threshold}}
+        }
+      }
+    },
+  },
+})

@@ -12,11 +12,10 @@ export default defineConfig({
   // 复制模板文件
   publicDir: false,
   onSuccess: async () => {
-    // 手动复制模板文件
+    // 手动复制模板文件和目录结构
     await import('fs-extra').then(async (fs) => {
-      await fs.copy('src/modules/testing/templates/testing-strategy.yaml', 'dist/modules/testing/templates/testing-strategy.yaml')
-      await fs.copy('src/modules/testing/templates/vitest.config.template', 'dist/modules/testing/templates/vitest.config.template')
-      await fs.copy('src/modules/testing/templates/test-setup.template', 'dist/modules/testing/templates/test-setup.template')
+      // 递归复制整个templates目录
+      await fs.copy('src/modules/testing/templates', 'dist/modules/testing/templates')
     })
   },
   // metafile: true,

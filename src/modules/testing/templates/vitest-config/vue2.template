@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitest/config'
-{imports}
+import { createVuePlugin } from 'vite-plugin-vue2'
 
 export default defineConfig({
-{plugins}
+  plugins: [createVuePlugin()],
   test: {
     environment: 'jsdom',
-    globals: true,{setupFiles}
+    globals: true,
+    setupFiles: ['./src/test-setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -15,7 +16,17 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.*',
         'coverage/**',
+        '**/*.stories.*',
+        '**/*.test.*',
       ],
+      thresholds: {
+        global: {
+          branches: 75,
+          functions: 75,
+          lines: 75,
+          statements: 75
+        }
+      }
     },
   },
 })

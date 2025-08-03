@@ -99,6 +99,8 @@ export interface ProjectDetection {
   packageManager: 'npm' | 'yarn' | 'pnpm'
   /** 是否为 TypeScript 项目 */
   isTypeScript: boolean
+  /** 是否为工作区项目 */
+  hasWorkspace: boolean
   /** 是否已有测试配置 */
   hasExistingTests: boolean
   /** 现有测试框架 */
