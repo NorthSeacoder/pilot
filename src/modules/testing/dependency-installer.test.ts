@@ -277,6 +277,65 @@ describe('dependency-installer', () => {
         )
         expect(installCall).toBeDefined()
       })
+
+      it('should add -w flag for pnpm workspace root installations', async () => {
+        // Test pnpm workspace root
+        const pnpmWorkspaceProjectInfo = { 
+          ...mockProjectInfo, 
+          packageManager: 'pnpm' as const,
+          hasWorkspace: true,
+          currentDir: '/test/project',
+          rootDir: '/test/project',
+          workspaceInfo: {
+            type: 'pnpm' as const,
+            packages: [],
+            rootPackageJson: {},
+            currentLocation: 'root' as const,
+            currentPackage: undefined
+          }
+        }
+        
+        const installer = new DependencyInstaller(pnpmWorkspaceProjectInfo)
+        await installer.installDependencies()
+
+        expect(mockExeca).toHaveBeenCalledWith(
+          'pnpm',
+          expect.arrayContaining(['add', '-D', '-w']),
+          expect.any(Object)
+        )
+
+        vi.clearAllMocks()
+
+        // Test pnpm workspace package (should not add -w)
+        const pnpmPackageProjectInfo = { 
+          ...pnpmWorkspaceProjectInfo,
+          currentDir: '/test/project/packages/app',
+          workspaceInfo: {
+            ...pnpmWorkspaceProjectInfo.workspaceInfo!,
+            currentLocation: 'package' as const,
+            currentPackage: {
+              name: 'app',
+              path: 'packages/app',
+              packageJson: {},
+              techStack: 'react' as const
+            }
+          }
+        }
+        
+        const packageInstaller = new DependencyInstaller(pnpmPackageProjectInfo)
+        await packageInstaller.installDependencies()
+
+        expect(mockExeca).toHaveBeenCalledWith(
+          'pnpm',
+          expect.arrayContaining(['add', '-D']),
+          expect.any(Object)
+        )
+        expect(mockExeca).not.toHaveBeenCalledWith(
+          'pnpm',
+          expect.arrayContaining(['-w']),
+          expect.any(Object)
+        )
+      })
     })
   })
 

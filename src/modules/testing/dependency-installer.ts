@@ -319,6 +319,22 @@ export class DependencyInstaller {
   }
 
   /**
+   * 检测是否在工作区根目录安装依赖
+   */
+  private isWorkspaceRoot(): boolean {
+    const { workspaceInfo, currentDir, rootDir, hasWorkspace } = this.projectInfo
+    
+    // 如果没有工作区，不是工作区项目
+    if (!hasWorkspace || !workspaceInfo) {
+      return false
+    }
+    
+    // 检查当前是否在工作区根目录
+    // 无论currentLocation是什么，只要currentDir等于rootDir就是在根目录
+    return currentDir === rootDir
+  }
+
+  /**
    * 根据包管理器和依赖类型获取安装命令
    */
   private getInstallCommand(isDev: boolean): string[] {
@@ -326,7 +342,12 @@ export class DependencyInstaller {
     
     switch (packageManager) {
       case 'pnpm':
-        return isDev ? ['pnpm', 'add', '-D'] : ['pnpm', 'add']
+        const pnpmCmd = isDev ? ['pnpm', 'add', '-D'] : ['pnpm', 'add']
+        // 如果在pnpm工作区根目录，添加 -w 标志
+        if (this.isWorkspaceRoot()) {
+          pnpmCmd.push('-w')
+        }
+        return pnpmCmd
       case 'yarn':
         return isDev ? ['yarn', 'add', '--dev'] : ['yarn', 'add']
       case 'npm':
