@@ -1,9 +1,12 @@
 import path from 'node:path'
 import { readFile, writeFile } from 'fs/promises'
 import { pathExists } from 'fs-extra'
+import { fileURLToPath } from 'node:url'
 import type { ProjectDetection, ModuleOptions } from '../../types'
-import { ConfigInstaller } from './config-installer'
-import { ConfigConflictResolver } from './config-conflict-resolver'
+
+// ES module compatible __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * 配置生成上下文
@@ -40,12 +43,8 @@ export interface ConflictInfo {
  * 增强的 Vitest 配置生成器
  */
 export class VitestConfigGenerator {
-  private installer: ConfigInstaller
-  private conflictResolver: ConfigConflictResolver
-
   constructor() {
-    this.installer = new ConfigInstaller()
-    this.conflictResolver = new ConfigConflictResolver()
+    // ConfigInstaller and ConfigConflictResolver can be instantiated when needed
   }
 
   /**

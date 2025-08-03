@@ -1,6 +1,11 @@
 import { copyFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { existsSync } from 'fs'
+import { fileURLToPath } from 'node:url'
+
+// ES module compatible __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export class RulesInstaller {
   private templatesDir: string

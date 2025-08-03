@@ -193,7 +193,7 @@ export default defineConfig({
 
       expect(result.conflicts).toBeDefined()
       expect(result.conflicts!.length).toBeGreaterThan(0)
-      expect(result.conflicts![0].severity).toBe('warning')
+      expect(result.conflicts![0]!.severity).toBe('warning')
     })
 
     it('should handle workspace package execution context', async () => {

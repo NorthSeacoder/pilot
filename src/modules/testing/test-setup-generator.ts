@@ -1,7 +1,12 @@
 import path from 'node:path'
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { pathExists } from 'fs-extra'
+import { fileURLToPath } from 'node:url'
 import type { ProjectDetection, ModuleOptions } from '../../types'
+
+// ES module compatible __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * 测试设置生成上下文
@@ -43,7 +48,7 @@ export class TestSetupGenerator {
    */
   async generateSetup(context: TestSetupContext): Promise<TestSetupResult> {
     const { projectInfo, options } = context
-    const { techStack, hasWorkspace, workspaceInfo } = projectInfo
+    const { techStack } = projectInfo
 
     // 确定设置文件路径
     const setupPath = this.determineSetupPath(projectInfo)
@@ -140,7 +145,8 @@ export class TestSetupGenerator {
     const hasTestingLibraryImport = existingSetup.content.includes('@testing-library')
     const hasJestDomImport = existingSetup.content.includes('@testing-library/jest-dom')
     const hasCleanup = existingSetup.content.includes('cleanup')
-    const hasVitestImports = existingSetup.content.includes('vitest')
+    // Check if existing setup has vitest imports
+    // const hasVitestImports = existingSetup.content.includes('vitest')
 
     // 检查冲突
     if (hasTestingLibraryImport || hasJestDomImport || hasCleanup) {
@@ -378,7 +384,7 @@ afterEach(() => {
   /**
    * 生成默认设置
    */
-  private generateDefaultSetup(techStack: string, variables: Record<string, any>): string {
+  private generateDefaultSetup(_techStack: string, variables: Record<string, any>): string {
     const imports = [
       "import '@testing-library/jest-dom'",
       variables.testingLibraryImport,

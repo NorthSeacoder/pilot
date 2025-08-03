@@ -1,7 +1,12 @@
 import { copyFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { existsSync } from 'fs'
+import { fileURLToPath } from 'node:url'
 import type { TechStack } from '../../types'
+
+// ES module compatible __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export class ConfigInstaller {
   private templatesDir: string

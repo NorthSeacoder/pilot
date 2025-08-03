@@ -1,10 +1,11 @@
 import chalk from 'chalk'
-import ora from 'ora'
 import type { ProjectDetection, ModuleOptions } from '../../types'
 import { installDependencies } from './dependency-installer'
 import { generateVitestConfig } from './config-generator'
 import { generateTestSetup } from './test-setup-generator'
 import { generateCursorRules } from './rules-generator'
+import { createProgressTracker } from '../../cli/progress-tracker'
+import { showTestingSuccessMessage, showStepSuccessMessage } from '../../cli/success-messages'
 
 /**
  * 安装测试模块
@@ -13,56 +14,142 @@ export async function installTestingModule(
   projectInfo: ProjectDetection,
   options: ModuleOptions
 ): Promise<void> {
+  const progressTracker = createProgressTracker(options.verbose)
+  
+  if (options.verbose) {
+    console.log(chalk.gray('\n🔧 测试模块安装详细信息:'))
+    console.log(chalk.gray(`  • 配置选项: ${JSON.stringify(options, null, 2)}`))
+  }
+
   console.log(chalk.blue('\n📦 开始配置测试环境...'))
+
+  const config = { projectInfo, options, module: 'testing' }
 
   // 如果是分步配置，只执行指定步骤
   if (options.rulesOnly) {
-    await generateCursorRules(projectInfo, options)
+    if (options.verbose) {
+      console.log(chalk.gray('🎯 执行模式: 仅生成 AI 规则'))
+    }
+    
+    progressTracker.start('生成 AI 测试规则文件')
+    try {
+      await generateCursorRules(projectInfo, options)
+      progressTracker.succeed('AI 测试规则文件生成完成')
+      showStepSuccessMessage('rules', config)
+    } catch (error) {
+      progressTracker.fail('AI 测试规则文件生成失败')
+      throw error
+    }
     return
   }
 
   if (options.configOnly) {
-    await generateVitestConfig(projectInfo, options)
+    if (options.verbose) {
+      console.log(chalk.gray('🎯 执行模式: 仅生成配置文件'))
+    }
+    
+    progressTracker.start('生成 Vitest 配置文件')
+    try {
+      await generateVitestConfig(projectInfo, options)
+      progressTracker.succeed('Vitest 配置文件生成完成')
+      showStepSuccessMessage('config', config)
+    } catch (error) {
+      progressTracker.fail('Vitest 配置文件生成失败')
+      throw error
+    }
     return
   }
 
   if (options.depsOnly) {
-    await installDependencies(projectInfo, options)
+    if (options.verbose) {
+      console.log(chalk.gray('🎯 执行模式: 仅安装依赖'))
+    }
+    
+    progressTracker.start('安装测试依赖')
+    try {
+      await installDependencies(projectInfo, options)
+      progressTracker.succeed('测试依赖安装完成')
+      showStepSuccessMessage('deps', config)
+    } catch (error) {
+      progressTracker.fail('测试依赖安装失败')
+      throw error
+    }
     return
   }
 
-  // 新增：仅生成测试设置文件
   if (options.setupOnly) {
-    await generateTestSetup(projectInfo, options)
+    if (options.verbose) {
+      console.log(chalk.gray('🎯 执行模式: 仅生成测试设置文件'))
+    }
+    
+    progressTracker.start('生成测试设置文件')
+    try {
+      await generateTestSetup(projectInfo, options)
+      progressTracker.succeed('测试设置文件生成完成')
+      showStepSuccessMessage('setup', config)
+    } catch (error) {
+      progressTracker.fail('测试设置文件生成失败')
+      throw error
+    }
     return
   }
 
   // 完整配置流程
+  if (options.verbose) {
+    console.log(chalk.gray('🎯 执行模式: 完整配置流程'))
+  }
+
   const steps = [
-    { name: '生成 AI 测试规则文件', fn: () => generateCursorRules(projectInfo, options) },
-    { name: '生成 Vitest 配置文件', fn: () => generateVitestConfig(projectInfo, options) },
-    { name: '生成测试设置文件', fn: () => generateTestSetup(projectInfo, options) },
+    { 
+      name: '生成 AI 测试规则文件', 
+      fn: () => generateCursorRules(projectInfo, options),
+      description: '创建 .cursor/rules/testing-strategy.mdc 文件'
+    },
+    { 
+      name: '生成 Vitest 配置文件', 
+      fn: () => generateVitestConfig(projectInfo, options),
+      description: '创建 vitest.config.ts 配置文件'
+    },
+    { 
+      name: '生成测试设置文件', 
+      fn: () => generateTestSetup(projectInfo, options),
+      description: '创建 test-setup.ts 测试环境设置文件'
+    },
   ]
 
   // 如果不跳过依赖安装，添加依赖安装步骤
   if (!options.noInstall) {
-    steps.push({ name: '安装测试依赖', fn: () => installDependencies(projectInfo, options) })
+    steps.push({ 
+      name: '安装测试依赖', 
+      fn: () => installDependencies(projectInfo, options),
+      description: '安装 vitest、testing-library 等测试相关依赖'
+    })
   }
 
-  for (const step of steps) {
-    const spinner = ora(step.name).start()
+  // 设置进度跟踪
+  progressTracker.setSteps(steps)
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i]!
+    
+    progressTracker.startStep(i)
+    progressTracker.start(step.name)
+    
     try {
       await step.fn()
-      spinner.succeed(step.name)
+      progressTracker.succeed(step.name)
+      progressTracker.completeStep()
     } catch (error) {
-      spinner.fail(`${step.name} 失败`)
+      progressTracker.fail(`${step.name} 失败`)
+      progressTracker.failStep(error instanceof Error ? error.message : String(error))
       throw error
     }
   }
 
-  console.log(chalk.green('\n🎉 测试环境配置完成!'))
-  console.log(chalk.yellow('\n📝 后续步骤:'))
-  console.log(chalk.gray('  1. 运行 npm test 执行测试'))
-  console.log(chalk.gray('  2. 查看 .cursor/testing-strategy.mdc 了解 AI 测试策略'))
-  console.log(chalk.gray('  3. 在 src 目录创建 *.test.ts 文件开始编写测试'))
+  // 显示执行总结
+  progressTracker.showSummary()
+
+  // 显示成功消息
+  showTestingSuccessMessage(config)
 }
+

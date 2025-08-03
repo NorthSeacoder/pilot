@@ -222,7 +222,7 @@ afterEach(() => {
 
       expect(result.conflicts).toBeDefined()
       expect(result.conflicts!.length).toBeGreaterThan(0)
-      expect(result.conflicts![0].severity).toBe('warning')
+      expect(result.conflicts![0]!.severity).toBe('warning')
     })
 
     it('should merge with existing setup without conflicts', async () => {
