@@ -33,12 +33,12 @@ describe('RulesInstaller', () => {
       await installer.installTestingStrategy(tempDir)
 
       const rulesPath = installer.getRulesPath(tempDir)
-      expect(rulesPath).toMatch(/\.cursor[\\/]rules[\\/]testing-strategy\.yaml$/)
+      expect(rulesPath).toMatch(/\.cursor[\\/]rules[\\/]testing-strategy\.mdc$/)
     })
 
     it('should return correct rules path', () => {
       const rulesPath = installer.getRulesPath('/test/project')
-      expect(rulesPath).toBe(join('/test/project', '.cursor', 'rules', 'testing-strategy.yaml'))
+      expect(rulesPath).toBe(join('/test/project', '.cursor', 'rules', 'testing-strategy.mdc'))
     })
   })
 

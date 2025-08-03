@@ -11,9 +11,18 @@ export class RulesInstaller {
   private templatesDir: string
 
   constructor(templatesDir?: string) {
-    // 修复构建后的模板路径：从 dist/cli 或其他位置正确定位到 dist/modules/testing/templates
-    const builtTemplatesDir = join(__dirname, '..', '..', 'modules', 'testing', 'templates')
-    this.templatesDir = templatesDir || builtTemplatesDir
+    if (templatesDir) {
+      this.templatesDir = templatesDir
+    } else {
+      // 检测是否在源代码环境（开发/测试）还是构建后环境（生产）
+      if (__dirname.includes('src/modules/testing')) {
+        // 开发/测试环境：直接使用当前目录下的 templates
+        this.templatesDir = join(__dirname, 'templates')
+      } else {
+        // 生产环境：从 dist/cli 定位到 dist/modules/testing/templates
+        this.templatesDir = join(__dirname, '..', 'modules', 'testing', 'templates')
+      }
+    }
   }
 
   /**
@@ -22,7 +31,7 @@ export class RulesInstaller {
   async installTestingStrategy(projectPath: string): Promise<void> {
     const sourceFile = join(this.templatesDir, 'testing-strategy.yaml')
     const targetDir = join(projectPath, '.cursor', 'rules')
-    const targetFile = join(targetDir, 'testing-strategy.yaml')
+    const targetFile = join(targetDir, 'testing-strategy.mdc')
 
     try {
       // Ensure target directory exists
@@ -45,7 +54,7 @@ export class RulesInstaller {
    * Check if testing strategy rules already exist
    */
   async hasExistingRules(projectPath: string): Promise<boolean> {
-    const targetFile = join(projectPath, '.cursor', 'rules', 'testing-strategy.yaml')
+    const targetFile = join(projectPath, '.cursor', 'rules', 'testing-strategy.mdc')
     return existsSync(targetFile)
   }
 
@@ -53,7 +62,7 @@ export class RulesInstaller {
    * Get the target path where rules will be installed
    */
   getRulesPath(projectPath: string): string {
-    return join(projectPath, '.cursor', 'rules', 'testing-strategy.yaml')
+    return join(projectPath, '.cursor', 'rules', 'testing-strategy.mdc')
   }
 }
 

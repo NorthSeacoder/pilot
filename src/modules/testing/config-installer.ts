@@ -12,9 +12,18 @@ export class ConfigInstaller {
   private templatesDir: string
 
   constructor(templatesDir?: string) {
-    // 修复构建后的模板路径：从 dist/cli 或其他位置正确定位到 dist/modules/testing/templates
-    const builtTemplatesDir = join(__dirname, '..', '..', 'modules', 'testing', 'templates')
-    this.templatesDir = templatesDir || builtTemplatesDir
+    if (templatesDir) {
+      this.templatesDir = templatesDir
+    } else {
+      // 检测是否在源代码环境（开发/测试）还是构建后环境（生产）
+      if (__dirname.includes('src/modules/testing')) {
+        // 开发/测试环境：直接使用当前目录下的 templates
+        this.templatesDir = join(__dirname, 'templates')
+      } else {
+        // 生产环境：从 dist/cli 定位到 dist/modules/testing/templates
+        this.templatesDir = join(__dirname, '..', 'modules', 'testing', 'templates')
+      }
+    }
   }
 
   /**

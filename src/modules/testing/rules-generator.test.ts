@@ -35,7 +35,7 @@ describe('generateCursorRules', () => {
     await generateCursorRules(projectInfo, { verbose: false })
 
     // Verify the rules file was created
-    const rulesPath = join(tempDir, '.cursor', 'rules', 'testing-strategy.yaml')
+    const rulesPath = join(tempDir, '.cursor', 'rules', 'testing-strategy.mdc')
     const content = await readFile(rulesPath, 'utf-8')
 
     // Check for key sections
@@ -67,7 +67,7 @@ describe('generateCursorRules', () => {
     await generateCursorRules(projectInfo, { verbose: true })
 
     // Verify the same rules file is created regardless of tech stack
-    const rulesPath = join(tempDir, '.cursor', 'rules', 'testing-strategy.yaml')
+    const rulesPath = join(tempDir, '.cursor', 'rules', 'testing-strategy.mdc')
     const content = await readFile(rulesPath, 'utf-8')
 
     expect(content).toContain('# 0. 核心原则')
