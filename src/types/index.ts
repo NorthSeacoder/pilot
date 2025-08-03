@@ -193,6 +193,8 @@ export interface ModuleOptions {
   rulesOnly?: boolean
   /** 是否仅安装依赖 */
   depsOnly?: boolean
+  /** 是否仅生成测试设置文件 */
+  setupOnly?: boolean
   /** 是否跳过依赖安装 */
   noInstall?: boolean
   /** 预览模式，不实际执行 */
@@ -213,4 +215,67 @@ export interface PilotOptions {
   module: Module
   /** 模块配置选项 */
   options: ModuleOptions
+}
+
+/**
+ * 配置冲突类型
+ */
+export type ConflictType = 'config-exists' | 'dependency-mismatch' | 'setup-conflict' | 'version-incompatible'
+
+/**
+ * 冲突严重程度
+ */
+export type ConflictSeverity = 'error' | 'warning' | 'info'
+
+/**
+ * 解决策略
+ */
+export type ResolutionStrategy = 'merge' | 'replace' | 'backup' | 'skip' | 'manual'
+
+/**
+ * 配置冲突信息
+ */
+export interface ConfigConflict {
+  id: string
+  type: ConflictType
+  severity: ConflictSeverity
+  filePath: string
+  description: string
+  existingValue: any
+  newValue: any
+  suggestedStrategy: ResolutionStrategy
+  availableStrategies: ResolutionStrategy[]
+}
+
+/**
+ * 冲突解决选项
+ */
+export interface ConflictResolutionOptions {
+  strategy: ResolutionStrategy
+  backupOriginal: boolean
+  preserveComments: boolean
+  mergeStrategy?: 'deep' | 'shallow' | 'selective'
+  userChoices?: Record<string, any>
+}
+
+/**
+ * 冲突解决结果
+ */
+export interface ConflictResolutionResult {
+  resolved: boolean
+  strategy: ResolutionStrategy
+  filePath: string
+  backupPath?: string
+  changes: string[]
+  errors: string[]
+}
+
+/**
+ * 冲突检测上下文
+ */
+export interface ConflictDetectionContext {
+  projectInfo: ProjectDetection
+  options: ModuleOptions
+  targetFiles: string[]
+  newConfigs: Record<string, any>
 }

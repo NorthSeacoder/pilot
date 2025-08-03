@@ -3,6 +3,7 @@ import ora from 'ora'
 import type { ProjectDetection, ModuleOptions } from '../../types'
 import { installDependencies } from './dependency-installer'
 import { generateVitestConfig } from './config-generator'
+import { generateTestSetup } from './test-setup-generator'
 import { generateCursorRules } from './rules-generator'
 
 /**
@@ -30,10 +31,17 @@ export async function installTestingModule(
     return
   }
 
+  // 新增：仅生成测试设置文件
+  if (options.setupOnly) {
+    await generateTestSetup(projectInfo, options)
+    return
+  }
+
   // 完整配置流程
   const steps = [
     { name: '生成 AI 测试规则文件', fn: () => generateCursorRules(projectInfo, options) },
     { name: '生成 Vitest 配置文件', fn: () => generateVitestConfig(projectInfo, options) },
+    { name: '生成测试设置文件', fn: () => generateTestSetup(projectInfo, options) },
   ]
 
   // 如果不跳过依赖安装，添加依赖安装步骤
