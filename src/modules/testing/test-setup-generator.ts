@@ -257,7 +257,9 @@ export class TestSetupGenerator {
     variables: Record<string, any>
   ): Promise<string> {
     const templateName = `${techStack}.template`
-    const templatePath = path.join(__dirname, 'templates', 'test-setup', templateName)
+    // 修复构建后的模板路径：从 dist/cli 或其他位置正确定位到 dist/modules/testing/templates
+    const builtTemplatesDir = path.join(__dirname, '..', '..', 'modules', 'testing', 'templates')
+    const templatePath = path.join(builtTemplatesDir, 'test-setup', templateName)
     
     try {
       let template = await readFile(templatePath, 'utf-8')

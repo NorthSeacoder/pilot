@@ -12,7 +12,9 @@ export class ConfigInstaller {
   private templatesDir: string
 
   constructor(templatesDir?: string) {
-    this.templatesDir = templatesDir || join(__dirname, 'templates')
+    // 修复构建后的模板路径：从 dist/cli 或其他位置正确定位到 dist/modules/testing/templates
+    const builtTemplatesDir = join(__dirname, '..', '..', 'modules', 'testing', 'templates')
+    this.templatesDir = templatesDir || builtTemplatesDir
   }
 
   /**

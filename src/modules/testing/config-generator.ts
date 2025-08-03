@@ -287,7 +287,9 @@ export class VitestConfigGenerator {
       templateName = `${techStack}.template`
     }
 
-    const templatePath = path.join(__dirname, 'templates', 'vitest-config', templateName)
+    // 修复构建后的模板路径：从 dist/cli 或其他位置正确定位到 dist/modules/testing/templates
+    const builtTemplatesDir = path.join(__dirname, '..', '..', 'modules', 'testing', 'templates')
+    const templatePath = path.join(builtTemplatesDir, 'vitest-config', templateName)
     
     try {
       let template = await readFile(templatePath, 'utf-8')
