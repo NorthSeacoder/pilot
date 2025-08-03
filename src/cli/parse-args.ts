@@ -50,6 +50,7 @@ export async function parseArgs(argv = process.argv): Promise<ParsedArgs> {
         .option('--setup', '仅生成测试设置文件 (test-setup.ts)')
         .option('--no-install', '跳过依赖安装，仅生成配置文件')
         .option('--dry-run', '预览模式，显示将要执行的操作但不实际执行')
+        .option('--force', '强制覆盖已存在的配置文件，不进行备份')
         .option('--stack <stack>', '覆盖自动检测的技术栈\n                        可选值: react, vue2, vue3')
         .option('--arch <arch>', '覆盖自动检测的项目架构\n                        可选值: single, pnpm-workspace, yarn-workspace')
         .option('-v, --verbose', '显示详细的操作日志和调试信息')
@@ -94,6 +95,7 @@ export async function parseArgs(argv = process.argv): Promise<ParsedArgs> {
             setupOnly: options.setup,
             noInstall: !options.install,
             dryRun: options.dryRun,
+            force: options.force,
             stack: options.stack,
             arch: options.arch,
             verbose: options.verbose,

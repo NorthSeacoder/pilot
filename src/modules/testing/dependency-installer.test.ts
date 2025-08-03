@@ -336,6 +336,111 @@ describe('dependency-installer', () => {
           expect.any(Object)
         )
       })
+
+      it('should cleanup backup file after successful installation', async () => {
+        const installer = new DependencyInstaller(mockProjectInfo, { 
+          backup: true,
+          verbose: true 
+        })
+        
+        // Mock fs unlink for cleanup
+        const mockUnlink = vi.fn().mockResolvedValue(undefined)
+        vi.doMock('node:fs/promises', async () => ({
+          ...(await vi.importActual('node:fs/promises')),
+          unlink: mockUnlink
+        }))
+
+        await installer.installDependencies()
+
+        // Should create backup first
+        expect(mockWriteFile).toHaveBeenCalledWith(
+          expect.stringMatching(/package\.json\.backup\.\d+$/),
+          expect.any(String),
+          'utf-8'
+        )
+
+        // Should cleanup backup after success
+        expect(mockUnlink).toHaveBeenCalledWith(
+          expect.stringMatching(/package\.json\.backup\.\d+$/)
+        )
+      })
+
+      it('should add test scripts to package.json after successful installation', async () => {
+        // Mock package.json without test scripts
+        const packageJsonWithoutScripts = {
+          ...mockPackageJson,
+          scripts: {
+            'build': 'tsc'
+          }
+        }
+        
+        mockReadFile
+          .mockResolvedValueOnce(JSON.stringify(packageJsonWithoutScripts, null, 2)) // Initial read
+          .mockResolvedValueOnce(JSON.stringify(packageJsonWithoutScripts, null, 2)) // For addTestScripts
+        
+        const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
+        await installer.installDependencies()
+
+        // Should write package.json with new test scripts
+        expect(mockWriteFile).toHaveBeenCalledWith(
+          expect.stringMatching(/package\.json$/),
+          expect.stringContaining('"test": "vitest"'),
+          'utf-8'
+        )
+        expect(mockWriteFile).toHaveBeenCalledWith(
+          expect.stringMatching(/package\.json$/),
+          expect.stringContaining('"test:ui": "vitest --ui"'),
+          'utf-8'
+        )
+        expect(mockWriteFile).toHaveBeenCalledWith(
+          expect.stringMatching(/package\.json$/),
+          expect.stringContaining('"test:coverage": "vitest --coverage"'),
+          'utf-8'
+        )
+      })
+
+      it('should not overwrite existing test scripts', async () => {
+        // Mock package.json with existing test script
+        const packageJsonWithTestScript = {
+          ...mockPackageJson,
+          scripts: {
+            'test': 'jest',
+            'build': 'tsc'
+          }
+        }
+        
+        mockReadFile
+          .mockResolvedValueOnce(JSON.stringify(packageJsonWithTestScript, null, 2)) // Initial read
+          .mockResolvedValueOnce(JSON.stringify(packageJsonWithTestScript, null, 2)) // For addTestScripts
+        
+        const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
+        await installer.installDependencies()
+
+        // Should not overwrite existing test script
+        const packageJsonCalls = mockWriteFile.mock.calls.filter(call => 
+          typeof call[0] === 'string' && call[0].includes('package.json') && !call[0].includes('backup')
+        )
+        
+        if (packageJsonCalls.length > 0) {
+          const finalPackageJson = packageJsonCalls[packageJsonCalls.length - 1]?.[1]
+          expect(finalPackageJson).toContain('"test": "jest"') // Original preserved
+          expect(finalPackageJson).toContain('"test:ui": "vitest --ui"') // New script added
+        }
+      })
+
+      it('should display dependencies to install before installation', async () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        
+        const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
+        await installer.installDependencies()
+
+        // Should display dependency list
+        expect(consoleSpy).toHaveBeenCalledWith('\n📦 准备安装以下依赖:')
+        expect(consoleSpy).toHaveBeenCalledWith('\n🛠️  开发依赖:')
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringMatching(/总计: \d+ 个依赖/))
+        
+        consoleSpy.mockRestore()
+      })
     })
   })
 

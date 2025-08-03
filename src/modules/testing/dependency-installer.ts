@@ -118,6 +118,18 @@ export class DependencyInstaller {
       // 执行安装
       const installResult = await this.executeInstallation(dependenciesToInstall)
       installResult.skipped = skippedDependencies
+      
+      // 如果安装成功，执行后续优化
+      if (installResult.success) {
+        // 添加测试脚本到 package.json
+        await this.addTestScripts()
+        
+        // 清理备份文件
+        if (this.backupInfo) {
+          await this.cleanupBackup()
+        }
+      }
+      
       return installResult
 
     } catch (error) {
@@ -218,6 +230,9 @@ export class DependencyInstaller {
       failed: []
     }
 
+    // 显示将要安装的依赖列表
+    this.displayDependenciesToInstall(dependencies)
+
     // 按类型分组依赖
     const devDeps = dependencies.filter(dep => dep.dev)
     const prodDeps = dependencies.filter(dep => !dep.dev)
@@ -225,16 +240,24 @@ export class DependencyInstaller {
     try {
       // 安装生产依赖
       if (prodDeps.length > 0) {
+        console.log('🔧 正在安装生产依赖...')
         const result = await this.installDependencyGroup(prodDeps, false)
         installResult.installed.push(...result.installed)
         installResult.failed.push(...result.failed)
+        if (result.installed.length > 0) {
+          console.log(`✅ 生产依赖安装完成 (${result.installed.length}/${prodDeps.length})`)
+        }
       }
 
       // 安装开发依赖
       if (devDeps.length > 0) {
+        console.log('🛠️  正在安装开发依赖...')
         const result = await this.installDependencyGroup(devDeps, true)
         installResult.installed.push(...result.installed)
         installResult.failed.push(...result.failed)
+        if (result.installed.length > 0) {
+          console.log(`✅ 开发依赖安装完成 (${result.installed.length}/${devDeps.length})`)
+        }
       }
 
       installResult.success = installResult.failed.length === 0
@@ -314,6 +337,118 @@ export class DependencyInstaller {
     } catch (error) {
       if (this.options.verbose) {
         console.error('回滚失败:', error)
+      }
+    }
+  }
+
+  /**
+   * 清理备份文件
+   */
+  private async cleanupBackup(): Promise<void> {
+    if (!this.backupInfo) {
+      return
+    }
+
+    try {
+      const { unlink } = await import('node:fs/promises')
+      await unlink(this.backupInfo.backupPath)
+      
+      if (this.options.verbose) {
+        console.log(`已清理备份文件: ${this.backupInfo.backupPath}`)
+      }
+      
+      // 清理备份信息
+      this.backupInfo = undefined
+    } catch (error) {
+      if (this.options.verbose) {
+        console.warn(`清理备份文件失败: ${error}`)
+      }
+    }
+  }
+
+  /**
+   * 显示将要安装的依赖列表
+   */
+  private displayDependenciesToInstall(dependencies: DependencySpec[]): void {
+    if (dependencies.length === 0) {
+      return
+    }
+
+    console.log('\n📦 准备安装以下依赖:')
+    
+    // 按类型分组显示
+    const devDeps = dependencies.filter(dep => dep.dev)
+    const prodDeps = dependencies.filter(dep => !dep.dev)
+    
+    if (prodDeps.length > 0) {
+      console.log('\n🔧 生产依赖:')
+      prodDeps.forEach(dep => {
+        const version = dep.version ? `@${dep.version}` : ''
+        console.log(`  • ${dep.name}${version}`)
+      })
+    }
+    
+    if (devDeps.length > 0) {
+      console.log('\n🛠️  开发依赖:')
+      devDeps.forEach(dep => {
+        const version = dep.version ? `@${dep.version}` : ''
+        console.log(`  • ${dep.name}${version}`)
+      })
+    }
+    
+    console.log(`\n总计: ${dependencies.length} 个依赖\n`)
+  }
+
+  /**
+   * 添加测试脚本到 package.json
+   */
+  private async addTestScripts(): Promise<void> {
+    try {
+      const packageJsonPath = this.getPackageJsonPath()
+      const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'))
+      
+      // 确保 scripts 对象存在
+      if (!packageJson.scripts) {
+        packageJson.scripts = {}
+      }
+      
+      // 定义要添加的测试脚本
+      const testScripts = {
+        'test': 'vitest',
+        'test:ui': 'vitest --ui',
+        'test:coverage': 'vitest --coverage'
+      }
+      
+      let hasNewScripts = false
+      
+      // 智能添加脚本，避免覆盖现有脚本
+      for (const [scriptName, scriptCommand] of Object.entries(testScripts)) {
+        if (!packageJson.scripts[scriptName]) {
+          packageJson.scripts[scriptName] = scriptCommand
+          hasNewScripts = true
+          
+          if (this.options.verbose) {
+            console.log(`✅ 添加测试脚本: "${scriptName}": "${scriptCommand}"`)
+          }
+        } else if (this.options.verbose) {
+          console.log(`⏭️  跳过已存在的脚本: "${scriptName}"`)
+        }
+      }
+      
+      // 如果有新脚本，保存到文件
+      if (hasNewScripts) {
+        await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf-8')
+        
+        if (this.options.verbose) {
+          console.log('📝 测试脚本已添加到 package.json')
+        }
+      } else if (this.options.verbose) {
+        console.log('📝 所有测试脚本已存在，无需添加')
+      }
+      
+    } catch (error) {
+      if (this.options.verbose) {
+        console.warn(`添加测试脚本失败: ${error}`)
       }
     }
   }

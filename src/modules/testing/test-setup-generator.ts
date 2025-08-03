@@ -57,8 +57,15 @@ export class TestSetupGenerator {
     const existingSetup = await this.detectExistingSetup(setupPath)
     
     if (existingSetup && !options.dryRun) {
-      // 智能合并现有设置
-      return await this.mergeWithExistingSetup(existingSetup, context)
+      if (options.force) {
+        // 强制覆盖模式
+        if (options.verbose) {
+          console.log(`⚠️  强制覆盖现有设置: ${setupPath}`)
+        }
+      } else {
+        // 智能合并现有设置
+        return await this.mergeWithExistingSetup(existingSetup, context)
+      }
     }
 
     // 生成新设置
@@ -192,17 +199,22 @@ export class TestSetupGenerator {
       conflicts
     }
 
-    if (!options.dryRun && missingImports.length > 0 || missingSetup.length > 0) {
-      // 备份原文件
-      const backupPath = `${existingSetup.filePath}.backup`
-      await writeFile(backupPath, existingSetup.content, 'utf-8')
-      result.backup = backupPath
+    // 自动备份现有设置
+    const backupPath = `${existingSetup.filePath}.backup.${Date.now()}`
+    await writeFile(backupPath, existingSetup.content, 'utf-8')
+    result.backup = backupPath
 
+    if (!options.dryRun && (missingImports.length > 0 || missingSetup.length > 0)) {
       await writeFile(existingSetup.filePath, mergedContent, 'utf-8')
       
       if (options.verbose) {
-        console.log(`✅ 设置已合并到现有文件: ${existingSetup.filePath}`)
-        console.log(`📁 原设置已备份到: ${backupPath}`)
+        console.log(`📁 备份现有设置: ${path.basename(backupPath)}`)
+        console.log(`✅ 智能合并 ${path.basename(existingSetup.filePath)} (保留你的自定义设置)`)
+      }
+    } else {
+      if (options.verbose) {
+        console.log(`📁 备份现有设置: ${path.basename(backupPath)}`)
+        console.log(`✅ 现有设置无需更新: ${path.basename(existingSetup.filePath)}`)
       }
     }
 

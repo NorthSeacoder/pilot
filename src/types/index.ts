@@ -199,6 +199,8 @@ export interface ModuleOptions {
   noInstall?: boolean
   /** 预览模式，不实际执行 */
   dryRun?: boolean
+  /** 强制覆盖已存在的配置文件，不进行备份 */
+  force?: boolean
   /** 覆盖自动检测的技术栈 */
   stack?: TechStack
   /** 覆盖自动检测的架构 */

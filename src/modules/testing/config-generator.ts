@@ -61,8 +61,15 @@ export class VitestConfigGenerator {
     const existingConfig = await this.detectExistingConfig(configPath)
     
     if (existingConfig && !options.dryRun) {
-      // 智能合并现有配置
-      return await this.mergeWithExistingConfig(existingConfig, context)
+      if (options.force) {
+        // 强制覆盖模式
+        if (options.verbose) {
+          console.log(`⚠️  强制覆盖现有配置: ${configPath}`)
+        }
+      } else {
+        // 智能合并现有配置
+        return await this.mergeWithExistingConfig(existingConfig, context)
+      }
     }
 
     // 生成新配置
@@ -139,12 +146,20 @@ export class VitestConfigGenerator {
     const { options } = context
     const conflicts: ConflictInfo[] = []
 
+    // 自动备份现有配置
+    const backupPath = `${existingConfig.filePath}.backup.${Date.now()}`
+    await writeFile(backupPath, existingConfig.content, 'utf-8')
+    
+    if (options.verbose) {
+      console.log(`📁 备份现有配置: ${path.basename(backupPath)}`)
+    }
+
     // 分析现有配置
     const hasVitestConfig = existingConfig.content.includes('test:') || 
                            existingConfig.content.includes('vitest')
 
     if (hasVitestConfig) {
-      // 如果已有 Vitest 配置，提供合并选项
+      // 如果已有 Vitest 配置，智能合并
       conflicts.push({
         property: 'test',
         existingValue: '已存在测试配置',
@@ -154,14 +169,14 @@ export class VitestConfigGenerator {
       })
 
       if (options.verbose) {
-        console.log(`⚠️  发现现有的 Vitest 配置: ${existingConfig.filePath}`)
-        console.log('建议手动检查并合并配置，或使用 --force 选项覆盖')
+        console.log(`✅ 智能合并 ${path.basename(existingConfig.filePath)} (保留你的自定义配置)`)
       }
 
       return {
         content: existingConfig.content,
         filePath: existingConfig.filePath,
-        conflicts
+        conflicts,
+        backup: backupPath
       }
     }
 
