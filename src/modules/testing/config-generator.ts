@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
 import { pathExists } from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import type { ProjectDetection, ModuleOptions } from '../../types'
@@ -78,7 +78,7 @@ export class VitestConfigGenerator {
     if (!options.dryRun) {
       // 确保目录存在
       const configDir = path.dirname(configPath)
-      await require('fs/promises').mkdir(configDir, { recursive: true })
+      await mkdir(configDir, { recursive: true })
       
       await writeFile(configPath, configContent, 'utf-8')
       if (options.verbose) {
