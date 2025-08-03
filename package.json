@@ -1,5 +1,5 @@
 {
-    "name": "pilot",
+    "name": "@nsea/pilot",
     "version": "0.1.1",
     "description": "🚀 可扩展的前端项目开发体验增强平台 - 智能检测项目技术栈，自动配置开发环境",
     "keywords": [
