@@ -133,7 +133,7 @@ describe('dependency-installer', () => {
               name: 'sub-package',
               path: '/test/project/packages/sub-package',
               packageJson: mockPackageJson,
-              techStack: 'react'
+
             }
           }
         }
@@ -160,7 +160,7 @@ describe('dependency-installer', () => {
               name: 'sub-package',
               path: '/test/project/packages/sub-package',
               packageJson: mockPackageJson,
-              techStack: 'react'
+
             }
           }
         }
@@ -316,8 +316,7 @@ describe('dependency-installer', () => {
             currentPackage: {
               name: 'app',
               path: 'packages/app',
-              packageJson: {},
-              techStack: 'react' as const
+              packageJson: {}
             }
           }
         }

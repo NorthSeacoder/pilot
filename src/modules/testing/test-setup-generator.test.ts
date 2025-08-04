@@ -167,8 +167,7 @@ describe('TestSetupGenerator', () => {
           currentPackage: {
             name: 'app',
             path: packagePath,
-            packageJson: {},
-            techStack: 'react'
+            packageJson: {}
           }
         }
       }
