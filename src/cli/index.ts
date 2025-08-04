@@ -45,7 +45,7 @@ export async function main(): Promise<void> {
  */
 function showWelcome(): void {
   const welcomeText = chalk.bold.cyan('🚀 Pilot') + '\n' +
-    chalk.gray('前端项目开发体验增强平台') + '\n\n' +
+    chalk.gray('前端项目开发体验增强平台 -dev') + '\n\n' +
     chalk.yellow(`版本: ${packageVersion}`)
 
   console.log(boxen(welcomeText, {

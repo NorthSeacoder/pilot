@@ -3,8 +3,7 @@ import { pathExists } from 'fs-extra'
 import { readFile } from 'node:fs/promises'
 import { glob } from 'glob'
 import yaml from 'js-yaml'
-import type { ProjectArchitecture, WorkspaceInfo, WorkspacePackage, TechStack } from '../../types'
-import { detectFramework } from './framework-detector'
+import type { ProjectArchitecture, WorkspaceInfo, WorkspacePackage } from '../../types'
 import { safeAsync, safeReadFile, safeParseJSON } from '../../utils/error-handler'
 
 /**
@@ -104,17 +103,10 @@ async function detectWorkspacePackagesFromPatterns(
           })
           
           if (packageJson) {
-            const techStack = await safeAsync(
-              () => detectFramework(packageJson),
-              { operation: '框架检测', filePath: packageJsonPath },
-              'react' as TechStack
-            )
-            
             packages.push({
               name: packageJson.name || path.basename(dir),
               path: dir,
               packageJson,
-              techStack,
             })
           }
         }

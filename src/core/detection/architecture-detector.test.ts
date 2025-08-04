@@ -154,8 +154,6 @@ describe('Architecture Detection', () => {
       const yaml = await import('js-yaml')
       vi.mocked(yaml.load).mockReturnValue({ packages: ['packages/*'] })
 
-      const { detectFramework } = await import('./framework-detector')
-      vi.mocked(detectFramework).mockResolvedValue('react')
 
       const result = await detectWorkspaceInfo('/test/project', '/test/project', 'pnpm-workspace')
       
@@ -183,8 +181,6 @@ describe('Architecture Detection', () => {
       vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue(['packages/pkg1'])
 
-      const { detectFramework } = await import('./framework-detector')
-      vi.mocked(detectFramework).mockResolvedValue('react')
 
       const result = await detectWorkspaceInfo('/test/project', '/test/project', 'yarn-workspace')
       
@@ -216,8 +212,6 @@ describe('Architecture Detection', () => {
       const yaml = await import('js-yaml')
       vi.mocked(yaml.load).mockReturnValue({ packages: ['packages/*'] })
 
-      const { detectFramework } = await import('./framework-detector')
-      vi.mocked(detectFramework).mockResolvedValue('react')
 
       const result = await detectWorkspaceInfo(
         '/test/project', 
@@ -251,8 +245,6 @@ describe('Architecture Detection', () => {
       vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(glob).mockResolvedValue([])
 
-      const { detectFramework } = await import('./framework-detector')
-      vi.mocked(detectFramework).mockResolvedValue('react')
 
       const result = await detectWorkspaceInfo('/test/project', '/test/project', 'yarn-workspace')
       
@@ -364,8 +356,6 @@ describe('Architecture Detection', () => {
       const yaml = await import('js-yaml')
       vi.mocked(yaml.load).mockReturnValue({ packages: ['packages/*'] })
 
-      const { detectFramework } = await import('./framework-detector')
-      vi.mocked(detectFramework).mockResolvedValue('react')
 
       const result = await detectWorkspaceInfo('/test/project', '/test/project', 'pnpm-workspace')
       

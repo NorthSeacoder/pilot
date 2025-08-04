@@ -257,13 +257,20 @@ describe('Framework Detection', () => {
       readFile: vi.fn()
     }
 
+    // Mock node:fs/promises 模块
+    const mockFsPromises = {
+      readFile: vi.fn()
+    }
+
     beforeEach(() => {
       vi.doMock('fs-extra', () => mockFsExtra)
+      vi.doMock('node:fs/promises', () => mockFsPromises)
     })
 
     afterEach(() => {
       vi.clearAllMocks()
       vi.doUnmock('fs-extra')
+      vi.doUnmock('node:fs/promises')
     })
 
     it('应该检测 node_modules 中实际安装的 Vue 2', async () => {
@@ -280,7 +287,7 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('node_modules/vue/package.json'))
       })
 
-      mockFsExtra.readFile.mockResolvedValue(JSON.stringify({
+      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
         name: 'vue',
         version: '2.7.14'
       }))
@@ -304,7 +311,7 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('node_modules/vue/package.json'))
       })
 
-      mockFsExtra.readFile.mockResolvedValue(JSON.stringify({
+      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
         name: 'vue',
         version: '3.4.0'
       }))
@@ -364,7 +371,7 @@ describe('Framework Detection', () => {
         return Promise.resolve(false)
       })
 
-      mockFsExtra.readFile.mockImplementation((filePath: string) => {
+      mockFsPromises.readFile.mockImplementation((filePath: string) => {
         if (filePath.includes('/test/monorepo/packages/child/node_modules/vue/package.json')) {
           return Promise.resolve(JSON.stringify({ name: 'vue', version: '3.4.0' }))
         }
@@ -406,7 +413,7 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('/test/node_modules/vue/package.json'))
       })
 
-      mockFsExtra.readFile.mockResolvedValue(JSON.stringify({
+      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
         name: 'vue',
         version: '2.7.14'
       }))
@@ -423,6 +430,7 @@ describe('Framework Detection', () => {
 
   describe('代码内容分析检测', () => {
     let mockFsExtra: any
+    let mockFsPromises: any
     
     beforeEach(() => {
       // Reset all mocks
@@ -432,11 +440,18 @@ describe('Framework Detection', () => {
         pathExists: vi.fn(),
         readFile: vi.fn()
       }
+      
+      mockFsPromises = {
+        readFile: vi.fn()
+      }
+      
       vi.doMock('fs-extra', () => mockFsExtra)
+      vi.doMock('node:fs/promises', () => mockFsPromises)
     })
 
     afterEach(() => {
       vi.doUnmock('fs-extra')
+      vi.doUnmock('node:fs/promises')
     })
 
     it('应该通过入口文件检测 Vue 3', async () => {
@@ -450,7 +465,7 @@ createApp(App).mount('#app')
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/main.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(mainJs)
+      mockFsPromises.readFile.mockResolvedValue(mainJs)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -473,7 +488,7 @@ new Vue({
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/main.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(mainJs)
+      mockFsPromises.readFile.mockResolvedValue(mainJs)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -498,7 +513,7 @@ new Vue({
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/main.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(mainJs)
+      mockFsPromises.readFile.mockResolvedValue(mainJs)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -520,7 +535,7 @@ ReactDOM.render(<App />, document.getElementById('root'))
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/index.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(indexJs)
+      mockFsPromises.readFile.mockResolvedValue(indexJs)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -543,7 +558,7 @@ root.render(<App />)
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/index.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(indexJs)
+      mockFsPromises.readFile.mockResolvedValue(indexJs)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -568,7 +583,7 @@ const count = ref(0)
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/App.vue'))
       )
-      mockFsExtra.readFile.mockResolvedValue(appVue)
+      mockFsPromises.readFile.mockResolvedValue(appVue)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -599,7 +614,7 @@ export default {
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/App.vue'))
       )
-      mockFsExtra.readFile.mockResolvedValue(appVue)
+      mockFsPromises.readFile.mockResolvedValue(appVue)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -632,7 +647,7 @@ export default App
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/App.jsx'))
       )
-      mockFsExtra.readFile.mockResolvedValue(appJsx)
+      mockFsPromises.readFile.mockResolvedValue(appJsx)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -655,7 +670,7 @@ export default App
 
     it('应该处理文件读取错误', async () => {
       mockFsExtra.pathExists.mockResolvedValue(true)
-      mockFsExtra.readFile.mockRejectedValue(new Error('File read error'))
+      mockFsPromises.readFile.mockRejectedValue(new Error('File read error'))
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 
@@ -672,7 +687,7 @@ export default App
       mockFsExtra.pathExists.mockImplementation((path: string) => 
         Promise.resolve(path.includes('src/main.js'))
       )
-      mockFsExtra.readFile.mockResolvedValue(largeContent)
+      mockFsPromises.readFile.mockResolvedValue(largeContent)
 
       const result = await detectFramework({}, { 
         currentDir: '/test/project', 

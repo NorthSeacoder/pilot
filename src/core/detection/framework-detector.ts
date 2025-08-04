@@ -31,12 +31,10 @@ export async function detectFramework(
       dependencies = mergedDependencies
     }
   }
-
   // 使用合并后的依赖进行框架检测
   const dependencyResult = await detectFrameworkFromDependencies(dependencies)
-  
-  // 如果检测到非默认框架，直接返回
-  if (dependencyResult !== 'react') {
+  // 如果检测到明确的框架，直接返回
+  if (dependencyResult) {
     return dependencyResult
   }
   
@@ -46,8 +44,8 @@ export async function detectFramework(
       context.rootDir,
       context.currentDir
     )
-    
-    if (nodeModulesResult && nodeModulesResult !== 'react') {
+    console.log('nodeModulesResult', nodeModulesResult,{currentDir:context.currentDir,rootDir:context.rootDir})
+    if (nodeModulesResult) {
       return nodeModulesResult
     }
   }
@@ -55,7 +53,8 @@ export async function detectFramework(
   // 第三层：代码内容分析（新增 - 仅在 package.json 方法都失败时启用）
   if (context?.currentDir) {
     const codeAnalysisResult = await detectFrameworkByCodeAnalysis(context.currentDir)
-    if (codeAnalysisResult && codeAnalysisResult !== 'react') {
+    console.log('codeAnalysisResult', codeAnalysisResult)
+    if (codeAnalysisResult) {
       return codeAnalysisResult
     }
   }
@@ -165,7 +164,8 @@ async function detectFrameworkFromNodeModules(
  */
 async function checkFrameworkInNodeModules(nodeModulesPath: string): Promise<TechStack | null> {
   try {
-    const { pathExists, readFile } = await import('fs-extra')
+    const { pathExists } = await import('fs-extra')
+    const { readFile } = await import('node:fs/promises')
     
     // 检查 Vue（优先检查，因为更容易被误判为 React）
     const vuePackagePath = path.join(nodeModulesPath, 'vue', 'package.json')
@@ -233,7 +233,7 @@ function detectVueVersionFromPackage(version: string): TechStack {
 /**
  * 从依赖对象中检测框架
  */
-async function detectFrameworkFromDependencies(dependencies: any): Promise<TechStack> {
+async function detectFrameworkFromDependencies(dependencies: any): Promise<TechStack | null> {
   // 检测 React
   if (dependencies.react) {
     return 'react'
@@ -267,8 +267,8 @@ async function detectFrameworkFromDependencies(dependencies: any): Promise<TechS
     return 'vue2'
   }
 
-  // 默认假设是 React
-  return 'react'
+  // 没有检测到明确的框架依赖
+  return null
 }
 
 /**
@@ -291,13 +291,18 @@ async function detectFrameworkByCodeAnalysis(currentDir: string): Promise<TechSt
  */
 async function analyzeEntryFiles(currentDir: string): Promise<TechStack | null> {
   try {
-    const { pathExists, readFile } = await import('fs-extra')
+    const { pathExists } = await import('fs-extra')
+    const { readFile } = await import('node:fs/promises')
     
     const entryFiles = [
       'src/main.js', 
       'src/main.ts', 
       'src/index.js', 
       'src/index.ts',
+      'src/app/main.js', 
+      'src/app/main.ts', 
+      'src/app/index.js', 
+      'src/app/index.ts',
       'main.js',
       'index.js'
     ]
@@ -346,15 +351,18 @@ async function analyzeEntryFiles(currentDir: string): Promise<TechStack | null> 
  */
 async function analyzeComponentFiles(currentDir: string): Promise<TechStack | null> {
   try {
-    const { pathExists, readFile } = await import('fs-extra')
+    const { pathExists } = await import('fs-extra')
+    const { readFile } = await import('node:fs/promises')
     
     // 查找 src 目录下的几个典型文件
     const typicalFiles = [
       'src/App.vue',
+      'src/app/app.vue',
       'src/App.js', 
       'src/App.jsx',
       'src/App.tsx',
-      'src/components/index.js'
+      'src/common/component/index.ts',
+      'src/common/component/index.js'
     ]
     
     for (const file of typicalFiles) {

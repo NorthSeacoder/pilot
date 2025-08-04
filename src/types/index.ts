@@ -23,8 +23,6 @@ export interface WorkspacePackage {
   path: string
   /** package.json 内容 */
   packageJson: any
-  /** 技术栈 */
-  techStack: TechStack
 }
 
 /**
