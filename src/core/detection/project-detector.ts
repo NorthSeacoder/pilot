@@ -38,7 +38,7 @@ export async function detectProject(options: ModuleOptions): Promise<ProjectDete
     nodeVersion
   ] = await Promise.all([
     // 检测技术栈
-    options.stack ? Promise.resolve(options.stack) : detectFramework(packageJson),
+    options.stack ? Promise.resolve(options.stack) : detectFramework(packageJson, { currentDir, rootDir }),
     // 检测架构
     options.arch ? Promise.resolve(options.arch) : detectArchitecture(rootDir),
     // 检测包管理器
