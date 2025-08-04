@@ -5,7 +5,7 @@ import { safeReadFile, safeParseJSON } from '../../utils/error-handler'
 /**
  * 检测项目是否使用 TypeScript
  */
-export async function detectTypeScript(rootDir: string, packageJson: any): Promise<boolean> {
+export async function detectTypeScript(currentDir: string, packageJson: any): Promise<boolean> {
   // 检查 package.json 中的 TypeScript 依赖
   const dependencies = {
     ...packageJson.dependencies,
@@ -17,7 +17,7 @@ export async function detectTypeScript(rootDir: string, packageJson: any): Promi
   }
 
   // 检查是否存在 tsconfig.json
-  const tsconfigPath = path.join(rootDir, 'tsconfig.json')
+  const tsconfigPath = path.join(currentDir, 'tsconfig.json')
   if (await pathExists(tsconfigPath)) {
     return true
   }
@@ -35,7 +35,7 @@ export async function detectTypeScript(rootDir: string, packageJson: any): Promi
   ]
 
   for (const file of commonTsFiles) {
-    if (await pathExists(path.join(rootDir, file))) {
+    if (await pathExists(path.join(currentDir, file))) {
       return true
     }
   }
@@ -46,8 +46,8 @@ export async function detectTypeScript(rootDir: string, packageJson: any): Promi
 /**
  * 获取 TypeScript 配置信息
  */
-export async function getTypeScriptConfig(rootDir: string): Promise<any | null> {
-  const tsconfigPath = path.join(rootDir, 'tsconfig.json')
+export async function getTypeScriptConfig(currentDir: string): Promise<any | null> {
+  const tsconfigPath = path.join(currentDir, 'tsconfig.json')
   
   if (await pathExists(tsconfigPath)) {
     const content = await safeReadFile(tsconfigPath)

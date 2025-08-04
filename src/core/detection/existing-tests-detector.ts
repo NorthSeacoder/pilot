@@ -5,9 +5,28 @@ import { glob } from 'glob'
 import type { ExistingConfig } from '../../types'
 
 /**
+ * 检查 vite.config 文件是否真的包含 vitest 配置
+ */
+async function hasVitestConfig(content: string): Promise<boolean> {
+  // 检查是否包含 vitest 相关的配置关键字
+  const vitestKeywords = [
+    'test:',           // test: { ... }
+    'vitest',          // import { vitest } 或其他 vitest 引用
+    '"test"',          // "test": { ... }
+    "'test'",          // 'test': { ... }
+    'environment:',    // test.environment
+    'globals:',        // test.globals
+    'setupFiles:',     // test.setupFiles
+  ]
+  
+  // 检查是否包含任何 vitest 相关关键字
+  return vitestKeywords.some(keyword => content.includes(keyword))
+}
+
+/**
  * 检测现有的测试配置和框架
  */
-export async function detectExistingTests(rootDir: string, packageJson: any): Promise<{
+export async function detectExistingTests(currentDir: string, packageJson: any): Promise<{
   hasExistingTests: boolean
   existingTestFrameworks: string[]
   existingConfigs: ExistingConfig[]
@@ -52,17 +71,33 @@ export async function detectExistingTests(rootDir: string, packageJson: any): Pr
   ]
 
   for (const { pattern, type } of configFiles) {
-    const files = await glob(pattern, { cwd: rootDir })
+    const files = await glob(pattern, { cwd: currentDir })
     for (const file of files) {
-      const filePath = path.join(rootDir, file)
+      const filePath = path.join(currentDir, file)
       try {
         const content = await readFile(filePath, 'utf-8')
-        existingConfigs.push({
-          type,
-          filePath,
-          content,
-          conflicts: [], // Will be populated later during conflict analysis
-        })
+        
+        // 特殊处理 vite.config.* 文件
+        if (pattern === 'vite.config.*') {
+          // 只有真正包含 vitest 配置的 vite.config 才被识别为 vitest
+          if (await hasVitestConfig(content)) {
+            existingConfigs.push({
+              type,
+              filePath,
+              content,
+              conflicts: [], // Will be populated later during conflict analysis
+            })
+          }
+          // 如果不包含 vitest 配置，跳过此文件
+        } else {
+          // 其他配置文件直接按文件名判断
+          existingConfigs.push({
+            type,
+            filePath,
+            content,
+            conflicts: [], // Will be populated later during conflict analysis
+          })
+        }
       } catch {
         // Ignore read errors
       }
@@ -73,7 +108,7 @@ export async function detectExistingTests(rootDir: string, packageJson: any): Pr
   if (packageJson.vitest) {
     existingConfigs.push({
       type: 'vitest',
-      filePath: path.join(rootDir, 'package.json'),
+      filePath: path.join(currentDir, 'package.json'),
       content: packageJson.vitest,
       conflicts: [],
     })
@@ -82,7 +117,7 @@ export async function detectExistingTests(rootDir: string, packageJson: any): Pr
   if (packageJson.jest) {
     existingConfigs.push({
       type: 'jest',
-      filePath: path.join(rootDir, 'package.json'),
+      filePath: path.join(currentDir, 'package.json'),
       content: packageJson.jest,
       conflicts: [],
     })
@@ -100,7 +135,7 @@ export async function detectExistingTests(rootDir: string, packageJson: any): Pr
   let hasTestFiles = false
   for (const pattern of testPatterns) {
     const files = await glob(pattern, { 
-      cwd: rootDir,
+      cwd: currentDir,
       ignore: ['node_modules/**', 'dist/**', 'build/**']
     })
     if (files.length > 0) {
@@ -110,7 +145,6 @@ export async function detectExistingTests(rootDir: string, packageJson: any): Pr
   }
 
   const hasExistingTests = existingTestFrameworks.length > 0 || existingConfigs.length > 0 || hasTestFiles
-
   return {
     hasExistingTests,
     existingTestFrameworks,

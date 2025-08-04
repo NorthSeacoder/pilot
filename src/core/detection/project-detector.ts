@@ -46,9 +46,9 @@ export async function detectProject(options: ModuleOptions): Promise<ProjectDete
         // 检测包管理器
         detectPackageManager(rootDir),
         // 检测 TypeScript
-        detectTypeScript(rootDir, packageJson),
+        detectTypeScript(currentDir, packageJson),
         // 检测现有测试配置
-        detectExistingTests(rootDir, packageJson),
+        detectExistingTests(currentDir, packageJson),
         // 分析依赖版本
         analyzeDependencyVersions(packageJson),
         // 获取 Node.js 版本（同步操作包装为 Promise）
