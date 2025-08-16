@@ -10,13 +10,13 @@ import { showGenericSuccessMessage } from '../cli/success-messages'
  */
 export async function addModule(pilotOptions: PilotOptions): Promise<void> {
   const { module, options } = pilotOptions
-  
+
   if (options.verbose) {
     console.log(chalk.gray('🔧 详细模式已启用'))
     console.log(chalk.gray(`命令行选项: ${JSON.stringify(options, null, 2)}`))
   }
 
-  const spinner = options.verbose 
+  const spinner = options.verbose
     ? ora('正在检测项目信息...').start()
     : ora('正在检测项目信息...').start()
 
@@ -25,9 +25,9 @@ export async function addModule(pilotOptions: PilotOptions): Promise<void> {
     if (options.verbose) {
       console.log(chalk.gray('\n🔍 开始项目检测...'))
     }
-    
+
     const projectInfo = await detectProject(options)
-    
+
     if (options.verbose) {
       spinner.succeed('项目检测完成')
       console.log(chalk.gray('📊 检测结果详情:'))
@@ -37,11 +37,18 @@ export async function addModule(pilotOptions: PilotOptions): Promise<void> {
       console.log(chalk.gray(`  • TypeScript: ${projectInfo.isTypeScript ? '是' : '否'}`))
       console.log(chalk.gray(`  • 工作区: ${projectInfo.hasWorkspace ? '是' : '否'}`))
       console.log(chalk.gray(`  • 现有测试: ${projectInfo.hasExistingTests ? '是' : '否'}`))
+      if (projectInfo.hasExistingTests && projectInfo.existingTestFrameworks.length > 0) {
+        console.log(
+          chalk.gray(`  • 检测到的测试框架: ${projectInfo.existingTestFrameworks.join(', ')}`)
+        )
+      }
       console.log(chalk.gray(`  • 项目根目录: ${projectInfo.rootDir}`))
       console.log(chalk.gray(`  • 当前目录: ${projectInfo.currentDir}`))
       console.log(chalk.gray(`  • Node.js 版本: ${projectInfo.nodeVersion}`))
     } else {
-      spinner.succeed(`检测完成: ${chalk.green(projectInfo.techStack)} + ${chalk.green(projectInfo.architecture)}`)
+      spinner.succeed(
+        `检测完成: ${chalk.green(projectInfo.techStack)} + ${chalk.green(projectInfo.architecture)}`
+      )
     }
 
     if (options.dryRun) {
@@ -89,27 +96,46 @@ async function showDryRunPreview(
   console.log(`  • 包管理器: ${chalk.green(projectInfo.packageManager)}`)
   console.log(`  • TypeScript: ${projectInfo.isTypeScript ? chalk.green('是') : chalk.gray('否')}`)
   console.log(`  • 工作区项目: ${projectInfo.hasWorkspace ? chalk.green('是') : chalk.gray('否')}`)
-  console.log(`  • 现有测试配置: ${projectInfo.hasExistingTests ? chalk.yellow('是') : chalk.gray('否')}`)
+  console.log(
+    `  • 现有测试配置: ${projectInfo.hasExistingTests ? chalk.yellow('是') : chalk.gray('否')}`
+  )
 
   console.log(chalk.cyan('\n🎯 要添加的模块:'), chalk.green(module))
 
   if (module === 'testing') {
     console.log(chalk.cyan('\n📝 将要执行的操作:'))
-    
+
     if (options.rulesOnly) {
-      console.log(`  • ${chalk.green('✓')} 生成 AI 测试规则文件 (.cursor/rules/testing-strategy.mdc)`)
+      console.log(
+        `  • ${chalk.green('✓')} 生成 AI 测试规则文件 (.cursor/rules/testing-strategy.mdc)`
+      )
     } else if (options.configOnly) {
       console.log(`  • ${chalk.green('✓')} 生成 Vitest 配置文件 (vitest.config.ts)`)
     } else if (options.depsOnly) {
       console.log(`  • ${chalk.green('✓')} 安装测试依赖包`)
+      console.log(chalk.gray('    - vitest'))
+      console.log(chalk.gray('    - jsdom'))
+      if (projectInfo.techStack === 'react') {
+        console.log(chalk.gray('    - @testing-library/react'))
+        console.log(chalk.gray('    - @testing-library/jest-dom'))
+        console.log(chalk.gray('    - @testing-library/user-event'))
+      } else if (projectInfo.techStack.startsWith('vue')) {
+        console.log(chalk.gray('    - @vue/test-utils'))
+        console.log(chalk.gray('    - @testing-library/jest-dom'))
+      }
+      if (projectInfo.isTypeScript) {
+        console.log(chalk.gray('    - @types/jsdom'))
+      }
     } else if (options.setupOnly) {
       console.log(`  • ${chalk.green('✓')} 生成测试设置文件 (test-setup.ts)`)
     } else {
       // 完整流程
-      console.log(`  • ${chalk.green('✓')} 生成 AI 测试规则文件 (.cursor/rules/testing-strategy.mdc)`)
+      console.log(
+        `  • ${chalk.green('✓')} 生成 AI 测试规则文件 (.cursor/rules/testing-strategy.mdc)`
+      )
       console.log(`  • ${chalk.green('✓')} 生成 Vitest 配置文件 (vitest.config.ts)`)
       console.log(`  • ${chalk.green('✓')} 生成测试设置文件 (test-setup.ts)`)
-      
+
       if (!options.noInstall) {
         console.log(`  • ${chalk.green('✓')} 安装测试依赖包`)
         console.log(chalk.gray('    - vitest'))

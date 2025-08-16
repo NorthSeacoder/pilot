@@ -23,7 +23,13 @@ export async function main(): Promise<void> {
         // 显示欢迎信息
         showWelcome()
         if (options) {
-          await addModule(options)
+          try {
+            await addModule(options)
+          } catch (moduleError) {
+            // 处理模块执行错误
+            errorHandler(moduleError as Error)
+            return // errorHandler 会调用 process.exit
+          }
         }
         break
       case 'version':
@@ -44,16 +50,21 @@ export async function main(): Promise<void> {
  * 显示欢迎信息
  */
 function showWelcome(): void {
-  const welcomeText = chalk.bold.cyan('🚀 Pilot') + '\n' +
-    chalk.gray('前端项目开发体验增强平台 -dev') + '\n\n' +
+  const welcomeText =
+    chalk.bold.cyan('🚀 Pilot') +
+    '\n' +
+    chalk.gray('前端项目开发体验增强平台 -dev') +
+    '\n\n' +
     chalk.yellow(`版本: ${packageVersion}`)
 
-  console.log(boxen(welcomeText, {
-    padding: 1,
-    margin: 1,
-    borderStyle: 'round',
-    borderColor: 'cyan'
-  }))
+  console.log(
+    boxen(welcomeText, {
+      padding: 1,
+      margin: 1,
+      borderStyle: 'round',
+      borderColor: 'cyan',
+    })
+  )
 }
 
 /**
@@ -61,9 +72,9 @@ function showWelcome(): void {
  */
 function errorHandler(error: Error): void {
   console.error(chalk.red('\n💥 操作失败'))
-  
+
   let message = error.message || String(error)
-  
+
   // 提供更友好的错误消息
   if (message.includes('ENOENT')) {
     console.error(chalk.yellow('📁 文件或目录不存在'))

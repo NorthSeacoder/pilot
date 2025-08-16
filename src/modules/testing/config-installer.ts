@@ -29,7 +29,11 @@ export class ConfigInstaller {
   /**
    * Install Vitest config file for specific tech stack
    */
-  async installVitestConfig(projectPath: string, techStack: TechStack, hasWorkspace: boolean = false): Promise<void> {
+  async installVitestConfig(
+    projectPath: string,
+    techStack: TechStack,
+    hasWorkspace: boolean = false
+  ): Promise<void> {
     try {
       const templateName = this.getVitestTemplate(techStack, hasWorkspace)
       const sourceFile = join(this.templatesDir, 'vitest-config', templateName)
@@ -47,11 +51,15 @@ export class ConfigInstaller {
   /**
    * Install test setup file for specific tech stack
    */
-  async installTestSetup(projectPath: string, techStack: TechStack, hasWorkspace: boolean = false): Promise<void> {
+  async installTestSetup(
+    projectPath: string,
+    techStack: TechStack,
+    hasWorkspace: boolean = false
+  ): Promise<void> {
     try {
       const templateName = this.getTestSetupTemplate(techStack)
       const sourceFile = join(this.templatesDir, 'test-setup', templateName)
-      
+
       // Determine setup file path
       let targetFile: string
       if (hasWorkspace) {
@@ -69,7 +77,7 @@ export class ConfigInstaller {
 
       // Ensure target directory exists
       await mkdir(dirname(targetFile), { recursive: true })
-      
+
       await copyFile(sourceFile, targetFile)
       console.log(`✅ Test setup installed: ${targetFile}`)
     } catch (error) {
@@ -82,7 +90,11 @@ export class ConfigInstaller {
   /**
    * Install both config and setup files
    */
-  async installTestingConfig(projectPath: string, techStack: TechStack, hasWorkspace: boolean = false): Promise<void> {
+  async installTestingConfig(
+    projectPath: string,
+    techStack: TechStack,
+    hasWorkspace: boolean = false
+  ): Promise<void> {
     await this.installVitestConfig(projectPath, techStack, hasWorkspace)
     await this.installTestSetup(projectPath, techStack, hasWorkspace)
   }
@@ -133,7 +145,7 @@ export class ConfigInstaller {
 
     return {
       hasConfig: existsSync(configPath),
-      hasSetup: existsSync(setupPathSrc) || existsSync(setupPathRoot)
+      hasSetup: existsSync(setupPathSrc) || existsSync(setupPathRoot),
     }
   }
 }

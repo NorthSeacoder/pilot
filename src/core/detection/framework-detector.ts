@@ -37,14 +37,17 @@ export async function detectFramework(
   if (dependencyResult) {
     return dependencyResult
   }
-  
+
   // 第二层：node_modules 实际安装检测（解决"搭车"依赖问题）
   if (context?.currentDir && context?.rootDir) {
     const nodeModulesResult = await detectFrameworkFromNodeModules(
       context.rootDir,
       context.currentDir
     )
-    console.log('nodeModulesResult', nodeModulesResult,{currentDir:context.currentDir,rootDir:context.rootDir})
+    console.log('nodeModulesResult', nodeModulesResult, {
+      currentDir: context.currentDir,
+      rootDir: context.rootDir,
+    })
     if (nodeModulesResult) {
       return nodeModulesResult
     }
@@ -78,11 +81,11 @@ async function safeReadRootPackageJson(rootDir: string): Promise<any | null> {
   try {
     const path = await import('node:path')
     const fs = await import('node:fs/promises')
-    
+
     const rootPackageJsonPath = path.join(rootDir, 'package.json')
     const content = await fs.readFile(rootPackageJsonPath, 'utf-8')
     return JSON.parse(content)
-  } catch (error) {
+  } catch (_error) {
     // 根目录 package.json 读取失败时返回 null，降级到原有逻辑
     return null
   }
@@ -123,24 +126,24 @@ async function getMergedDependencies(
  * 检测 node_modules 中实际安装的框架（解决"搭车"依赖问题）
  */
 async function detectFrameworkFromNodeModules(
-  rootDir: string, 
+  rootDir: string,
   currentDir: string
 ): Promise<TechStack | null> {
   // 定义搜索路径：当前目录 -> 根目录 -> 向上遍历
   const searchPaths: string[] = []
-  
+
   // 添加当前目录的 node_modules
   if (currentDir !== rootDir) {
     searchPaths.push(path.join(currentDir, 'node_modules'))
   }
-  
+
   // 添加根目录的 node_modules
   searchPaths.push(path.join(rootDir, 'node_modules'))
-  
+
   // 向上遍历查找 node_modules（处理嵌套项目场景）
   let parentDir = path.dirname(rootDir)
   let maxLevels = 3 // 最多向上查找3层，避免无限递归
-  
+
   while (maxLevels > 0 && parentDir !== path.dirname(parentDir)) {
     searchPaths.push(path.join(parentDir, 'node_modules'))
     parentDir = path.dirname(parentDir)
@@ -155,7 +158,7 @@ async function detectFrameworkFromNodeModules(
       return framework
     }
   }
-  
+
   return null
 }
 
@@ -166,7 +169,7 @@ async function checkFrameworkInNodeModules(nodeModulesPath: string): Promise<Tec
   try {
     const { pathExists } = await import('fs-extra')
     const { readFile } = await import('node:fs/promises')
-    
+
     // 检查 Vue（优先检查，因为更容易被误判为 React）
     const vuePackagePath = path.join(nodeModulesPath, 'vue', 'package.json')
     if (await pathExists(vuePackagePath)) {
@@ -174,30 +177,33 @@ async function checkFrameworkInNodeModules(nodeModulesPath: string): Promise<Tec
       const vuePackage = JSON.parse(vuePackageContent)
       return detectVueVersionFromPackage(vuePackage.version)
     }
-    
+
     // 检查 Vue 2 特有的包
-    const vueTemplateCompilerPath = path.join(nodeModulesPath, 'vue-template-compiler', 'package.json')
+    const vueTemplateCompilerPath = path.join(
+      nodeModulesPath,
+      'vue-template-compiler',
+      'package.json'
+    )
     if (await pathExists(vueTemplateCompilerPath)) {
       return 'vue2'
     }
-    
+
     // 检查 Vue 3 特有的包
     const vitejsPluginVuePath = path.join(nodeModulesPath, '@vitejs', 'plugin-vue', 'package.json')
     if (await pathExists(vitejsPluginVuePath)) {
       return 'vue3'
     }
-    
+
     // 检查 React
     const reactPackagePath = path.join(nodeModulesPath, 'react', 'package.json')
     if (await pathExists(reactPackagePath)) {
       return 'react'
     }
-    
-  } catch (error) {
+  } catch (_error) {
     // 文件系统错误时优雅降级，不影响检测流程
     return null
   }
-  
+
   return null
 }
 
@@ -206,26 +212,26 @@ async function checkFrameworkInNodeModules(nodeModulesPath: string): Promise<Tec
  */
 function detectVueVersionFromPackage(version: string): TechStack {
   if (!version) return 'vue3' // 默认 Vue 3
-  
+
   // Vue 3.x
   if (version.startsWith('3.') || version.startsWith('^3.') || version.startsWith('~3.')) {
     return 'vue3'
   }
-  
-  // Vue 2.x  
+
+  // Vue 2.x
   if (version.startsWith('2.') || version.startsWith('^2.') || version.startsWith('~2.')) {
     return 'vue2'
   }
-  
+
   // 包含数字的版本检测
   if (version.includes('3.')) {
     return 'vue3'
   }
-  
+
   if (version.includes('2.')) {
     return 'vue2'
   }
-  
+
   // 默认假设是 Vue 3
   return 'vue3'
 }
@@ -242,17 +248,17 @@ async function detectFrameworkFromDependencies(dependencies: any): Promise<TechS
   // 检测 Vue
   if (dependencies.vue) {
     const vueVersion = dependencies.vue
-    
+
     // Vue 3.x
     if (vueVersion.startsWith('^3.') || vueVersion.startsWith('~3.') || vueVersion.includes('3.')) {
       return 'vue3'
     }
-    
+
     // Vue 2.x
     if (vueVersion.startsWith('^2.') || vueVersion.startsWith('~2.') || vueVersion.includes('2.')) {
       return 'vue2'
     }
-    
+
     // 默认假设是 Vue 3
     return 'vue3'
   }
@@ -278,11 +284,11 @@ async function detectFrameworkByCodeAnalysis(currentDir: string): Promise<TechSt
   // 检测入口文件
   const entryResult = await analyzeEntryFiles(currentDir)
   if (entryResult) return entryResult
-  
+
   // 检测组件文件特征
   const componentResult = await analyzeComponentFiles(currentDir)
   if (componentResult) return componentResult
-  
+
   return null
 }
 
@@ -293,20 +299,20 @@ async function analyzeEntryFiles(currentDir: string): Promise<TechStack | null> 
   try {
     const { pathExists } = await import('fs-extra')
     const { readFile } = await import('node:fs/promises')
-    
+
     const entryFiles = [
-      'src/main.js', 
-      'src/main.ts', 
-      'src/index.js', 
+      'src/main.js',
+      'src/main.ts',
+      'src/index.js',
       'src/index.ts',
-      'src/app/main.js', 
-      'src/app/main.ts', 
-      'src/app/index.js', 
+      'src/app/main.js',
+      'src/app/main.ts',
+      'src/app/index.js',
       'src/app/index.ts',
       'main.js',
-      'index.js'
+      'index.js',
     ]
-    
+
     for (const entryFile of entryFiles) {
       const filePath = path.join(currentDir, entryFile)
       if (await pathExists(filePath)) {
@@ -322,27 +328,25 @@ async function analyzeEntryFiles(currentDir: string): Promise<TechStack | null> 
           if (/createApp\s*\(/m.test(content)) {
             return 'vue3'
           }
-          
+
           if (/new\s+Vue\s*\(/m.test(content)) {
             return 'vue2'
           }
-          
+
           if (/ReactDOM\.render|createRoot|React\.createElement/m.test(content)) {
             return 'react'
           }
-          
-        } catch (error) {
+        } catch (_error) {
           // 忽略读取错误，继续检测其他文件
           continue
         }
       }
     }
-    
-  } catch (error) {
+  } catch (_error) {
     // 动态导入 fs-extra 失败时降级
     return null
   }
-  
+
   return null
 }
 
@@ -353,64 +357,66 @@ async function analyzeComponentFiles(currentDir: string): Promise<TechStack | nu
   try {
     const { pathExists } = await import('fs-extra')
     const { readFile } = await import('node:fs/promises')
-    
+
     // 查找 src 目录下的几个典型文件
     const typicalFiles = [
       'src/App.vue',
       'src/app/app.vue',
-      'src/App.js', 
+      'src/App.js',
       'src/App.jsx',
       'src/App.tsx',
       'src/common/component/index.ts',
-      'src/common/component/index.js'
+      'src/common/component/index.js',
     ]
-    
+
     for (const file of typicalFiles) {
       const filePath = path.join(currentDir, file)
       if (await pathExists(filePath)) {
         try {
           const content = await readFile(filePath, 'utf-8')
-          
+
           // Vue 文件特征
-          if (file.endsWith('.vue') || 
-              content.includes('<template>') || 
-              content.includes('<script>')) {
-            
+          if (
+            file.endsWith('.vue') ||
+            content.includes('<template>') ||
+            content.includes('<script>')
+          ) {
             // 通过组件语法区分 Vue 2/3
-            if (content.includes('defineComponent') || 
-                content.includes('setup(') ||
-                content.includes('<script setup>')) {
+            if (
+              content.includes('defineComponent') ||
+              content.includes('setup(') ||
+              content.includes('<script setup>')
+            ) {
               return 'vue3'
             }
-            
+
             // Vue 2 特征
-            if (content.includes('export default {') ||
-                content.includes('Vue.component')) {
+            if (content.includes('export default {') || content.includes('Vue.component')) {
               return 'vue2'
             }
-            
+
             // 无法确定版本，但确定是 Vue，默认较新版本
             return 'vue3'
           }
-          
+
           // React 文件特征
-          if (content.includes('React.Component') ||
-              content.includes('useState') ||
-              content.includes('useEffect') ||
-              content.includes('function App()') ||
-              content.includes('const App =')) {
+          if (
+            content.includes('React.Component') ||
+            content.includes('useState') ||
+            content.includes('useEffect') ||
+            content.includes('function App()') ||
+            content.includes('const App =')
+          ) {
             return 'react'
           }
-          
-        } catch (error) {
+        } catch (_error) {
           continue
         }
       }
     }
-    
-  } catch (error) {
+  } catch (_error) {
     // 动态导入 fs-extra 失败或其他错误时降级
   }
-  
+
   return null
 }

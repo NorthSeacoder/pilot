@@ -56,10 +56,10 @@ export class VitestConfigGenerator {
 
     // 确定配置文件路径
     const configPath = this.determineConfigPath(projectInfo)
-    
+
     // 检查现有配置
     const existingConfig = await this.detectExistingConfig(configPath)
-    
+
     if (existingConfig && !options.dryRun) {
       if (options.force) {
         // 强制覆盖模式
@@ -74,19 +74,23 @@ export class VitestConfigGenerator {
 
     // 生成新配置
     const templateVariables = this.buildTemplateVariables(context)
-    const configContent = await this.renderConfigTemplate(techStack, hasWorkspace, templateVariables)
+    const configContent = await this.renderConfigTemplate(
+      techStack,
+      hasWorkspace,
+      templateVariables
+    )
 
     const result: ConfigResult = {
       content: configContent,
       filePath: configPath,
-      conflicts: []
+      conflicts: [],
     }
 
     if (!options.dryRun) {
       // 确保目录存在
       const configDir = path.dirname(configPath)
       await mkdir(configDir, { recursive: true })
-      
+
       await writeFile(configPath, configContent, 'utf-8')
       if (options.verbose) {
         console.log(`✅ Vitest 配置已生成: ${configPath}`)
@@ -149,14 +153,14 @@ export class VitestConfigGenerator {
     // 自动备份现有配置
     const backupPath = `${existingConfig.filePath}.backup.${Date.now()}`
     await writeFile(backupPath, existingConfig.content, 'utf-8')
-    
+
     if (options.verbose) {
       console.log(`📁 备份现有配置: ${path.basename(backupPath)}`)
     }
 
     // 分析现有配置
-    const hasVitestConfig = existingConfig.content.includes('test:') || 
-                           existingConfig.content.includes('vitest')
+    const hasVitestConfig =
+      existingConfig.content.includes('test:') || existingConfig.content.includes('vitest')
 
     if (hasVitestConfig) {
       // 如果已有 Vitest 配置，智能合并
@@ -165,7 +169,7 @@ export class VitestConfigGenerator {
         existingValue: '已存在测试配置',
         newValue: '新的测试配置',
         severity: 'warning',
-        description: '检测到现有的 Vitest 配置，建议手动合并或备份现有配置'
+        description: '检测到现有的 Vitest 配置，建议手动合并或备份现有配置',
       })
 
       if (options.verbose) {
@@ -176,14 +180,14 @@ export class VitestConfigGenerator {
         content: existingConfig.content,
         filePath: existingConfig.filePath,
         conflicts,
-        backup: backupPath
+        backup: backupPath,
       }
     }
 
     // 如果是 Vite 配置但没有测试配置，尝试添加测试配置
     const templateVariables = this.buildTemplateVariables(context)
     const testConfig = this.generateTestConfigSection(templateVariables)
-    
+
     let mergedContent = existingConfig.content
 
     // 简单的配置合并逻辑
@@ -191,14 +195,14 @@ export class VitestConfigGenerator {
       // 在 defineConfig 中添加 test 配置
       const configRegex = /export default defineConfig\(\{([\s\S]*?)\}\)/
       const match = mergedContent.match(configRegex)
-      
+
       if (match) {
         const configContent = match[1] || ''
         // 检查是否有内容且需要逗号
         const trimmedContent = configContent.trim()
         const needsComma = trimmedContent && !trimmedContent.endsWith(',')
         const separator = needsComma ? ',\n' : '\n'
-        
+
         mergedContent = mergedContent.replace(
           configRegex,
           `export default defineConfig({${configContent}${separator}  test: ${testConfig}\n})`
@@ -209,7 +213,7 @@ export class VitestConfigGenerator {
           existingValue: '无法解析的配置格式',
           newValue: '新的测试配置',
           severity: 'error',
-          description: '现有配置格式无法自动合并，需要手动处理'
+          description: '现有配置格式无法自动合并，需要手动处理',
         })
       }
     } else {
@@ -219,14 +223,14 @@ export class VitestConfigGenerator {
         existingValue: '无法解析的配置格式',
         newValue: '新的测试配置',
         severity: 'error',
-        description: '现有配置格式无法自动合并，需要手动处理'
+        description: '现有配置格式无法自动合并，需要手动处理',
       })
     }
 
     const result: ConfigResult = {
       content: mergedContent,
       filePath: existingConfig.filePath,
-      conflicts
+      conflicts,
     }
 
     if (!options.dryRun && conflicts.length === 0) {
@@ -236,7 +240,7 @@ export class VitestConfigGenerator {
       result.backup = backupPath
 
       await writeFile(existingConfig.filePath, mergedContent, 'utf-8')
-      
+
       if (options.verbose) {
         console.log(`✅ 配置已合并到现有文件: ${existingConfig.filePath}`)
         console.log(`📁 原配置已备份到: ${backupPath}`)
@@ -311,12 +315,12 @@ export class VitestConfigGenerator {
       // 生产环境：从 dist/cli 定位到 dist/modules/testing/templates
       templatesDir = path.join(__dirname, '..', 'modules', 'testing', 'templates')
     }
-    
+
     const templatePath = path.join(templatesDir, 'vitest-config', templateName)
-    
+
     try {
       let template = await readFile(templatePath, 'utf-8')
-      
+
       // 替换模板变量
       for (const [key, value] of Object.entries(variables)) {
         const placeholder = `{{${key}}}`
@@ -324,7 +328,7 @@ export class VitestConfigGenerator {
       }
 
       return template
-    } catch (error) {
+    } catch (_error) {
       console.warn(`警告: 无法读取模板文件 ${templatePath}，使用默认配置`)
       return this.generateDefaultConfig(techStack, variables)
     }
@@ -366,7 +370,8 @@ export class VitestConfigGenerator {
    * 生成默认配置
    */
   private generateDefaultConfig(_techStack: string, variables: Record<string, any>): string {
-    const pluginImport = variables.framework_plugin_import || "import react from '@vitejs/plugin-react'"
+    const pluginImport =
+      variables.framework_plugin_import || "import react from '@vitejs/plugin-react'"
     const plugin = variables.framework_plugin || 'react()'
     const testConfig = this.generateTestConfigSection(variables)
 
@@ -415,12 +420,12 @@ export async function generateVitestConfig(
   const context: ConfigContext = {
     projectInfo,
     options,
-    templateVariables: {}
+    templateVariables: {},
   }
 
   try {
     const result = await generator.generateConfig(context)
-    
+
     if (result.conflicts && result.conflicts.length > 0) {
       console.log('⚠️  配置生成过程中发现以下冲突:')
       for (const conflict of result.conflicts) {

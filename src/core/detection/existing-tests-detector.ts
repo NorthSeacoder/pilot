@@ -10,23 +10,26 @@ import type { ExistingConfig } from '../../types'
 async function hasVitestConfig(content: string): Promise<boolean> {
   // 检查是否包含 vitest 相关的配置关键字
   const vitestKeywords = [
-    'test:',           // test: { ... }
-    'vitest',          // import { vitest } 或其他 vitest 引用
-    '"test"',          // "test": { ... }
-    "'test'",          // 'test': { ... }
-    'environment:',    // test.environment
-    'globals:',        // test.globals
-    'setupFiles:',     // test.setupFiles
+    'test:', // test: { ... }
+    'vitest', // import { vitest } 或其他 vitest 引用
+    '"test"', // "test": { ... }
+    "'test'", // 'test': { ... }
+    'environment:', // test.environment
+    'globals:', // test.globals
+    'setupFiles:', // test.setupFiles
   ]
-  
+
   // 检查是否包含任何 vitest 相关关键字
-  return vitestKeywords.some(keyword => content.includes(keyword))
+  return vitestKeywords.some((keyword) => content.includes(keyword))
 }
 
 /**
  * 检测现有的测试配置和框架
  */
-export async function detectExistingTests(currentDir: string, packageJson: any): Promise<{
+export async function detectExistingTests(
+  currentDir: string,
+  packageJson: any
+): Promise<{
   hasExistingTests: boolean
   existingTestFrameworks: string[]
   existingConfigs: ExistingConfig[]
@@ -76,7 +79,7 @@ export async function detectExistingTests(currentDir: string, packageJson: any):
       const filePath = path.join(currentDir, file)
       try {
         const content = await readFile(filePath, 'utf-8')
-        
+
         // 特殊处理 vite.config.* 文件
         if (pattern === 'vite.config.*') {
           // 只有真正包含 vitest 配置的 vite.config 才被识别为 vitest
@@ -134,9 +137,9 @@ export async function detectExistingTests(currentDir: string, packageJson: any):
 
   let hasTestFiles = false
   for (const pattern of testPatterns) {
-    const files = await glob(pattern, { 
+    const files = await glob(pattern, {
       cwd: currentDir,
-      ignore: ['node_modules/**', 'dist/**', 'build/**']
+      ignore: ['node_modules/**', 'dist/**', 'build/**'],
     })
     if (files.length > 0) {
       hasTestFiles = true
@@ -144,7 +147,8 @@ export async function detectExistingTests(currentDir: string, packageJson: any):
     }
   }
 
-  const hasExistingTests = existingTestFrameworks.length > 0 || existingConfigs.length > 0 || hasTestFiles
+  const hasExistingTests =
+    existingTestFrameworks.length > 0 || existingConfigs.length > 0 || hasTestFiles
   return {
     hasExistingTests,
     existingTestFrameworks,

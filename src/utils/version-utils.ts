@@ -41,25 +41,25 @@ export function extractPatchVersion(version: string): number {
 export function compareVersions(v1: string, v2: string): number {
   const major1 = extractMajorVersion(v1)
   const major2 = extractMajorVersion(v2)
-  
+
   if (major1 !== major2) {
     return major1 > major2 ? 1 : -1
   }
-  
+
   const minor1 = extractMinorVersion(v1)
   const minor2 = extractMinorVersion(v2)
-  
+
   if (minor1 !== minor2) {
     return minor1 > minor2 ? 1 : -1
   }
-  
+
   const patch1 = extractPatchVersion(v1)
   const patch2 = extractPatchVersion(v2)
-  
+
   if (patch1 !== patch2) {
     return patch1 > patch2 ? 1 : -1
   }
-  
+
   return 0
 }
 
@@ -72,15 +72,15 @@ export function compareVersions(v1: string, v2: string): number {
 export function isVersionCompatible(existingVersion: string, requiredVersion: string): boolean {
   const existingMajor = extractMajorVersion(existingVersion)
   const requiredMajor = extractMajorVersion(requiredVersion)
-  
+
   // 主版本必须相同
   if (existingMajor !== requiredMajor) {
     return false
   }
-  
+
   const existingMinor = extractMinorVersion(existingVersion)
   const requiredMinor = extractMinorVersion(requiredVersion)
-  
+
   // 次版本必须大于等于需要的版本
   return existingMinor >= requiredMinor
 }
@@ -97,15 +97,22 @@ export function parseVersionRange(version: string): {
   if (version.startsWith('^')) {
     return { type: 'caret', version: version.slice(1) }
   }
-  
+
   if (version.startsWith('~')) {
     return { type: 'tilde', version: version.slice(1) }
   }
-  
-  if (version.includes(' - ') || version.includes(' || ') || version.includes('>=') || version.includes('<=') || version.includes('<') || version.includes('>')) {
+
+  if (
+    version.includes(' - ') ||
+    version.includes(' || ') ||
+    version.includes('>=') ||
+    version.includes('<=') ||
+    version.includes('<') ||
+    version.includes('>')
+  ) {
     return { type: 'range', version }
   }
-  
+
   return { type: 'exact', version }
 }
 
@@ -117,22 +124,26 @@ export function parseVersionRange(version: string): {
  */
 export function satisfiesVersionRange(version: string, range: string): boolean {
   const { type, version: rangeVersion } = parseVersionRange(range)
-  
+
   switch (type) {
     case 'exact':
       return compareVersions(version, rangeVersion) === 0
-      
+
     case 'caret':
       // ^1.2.3 允许 1.x.x，但不允许 2.x.x
-      return extractMajorVersion(version) === extractMajorVersion(rangeVersion) &&
-             compareVersions(version, rangeVersion) >= 0
-      
+      return (
+        extractMajorVersion(version) === extractMajorVersion(rangeVersion) &&
+        compareVersions(version, rangeVersion) >= 0
+      )
+
     case 'tilde':
       // ~1.2.3 允许 1.2.x，但不允许 1.3.x
-      return extractMajorVersion(version) === extractMajorVersion(rangeVersion) &&
-             extractMinorVersion(version) === extractMinorVersion(rangeVersion) &&
-             compareVersions(version, rangeVersion) >= 0
-      
+      return (
+        extractMajorVersion(version) === extractMajorVersion(rangeVersion) &&
+        extractMinorVersion(version) === extractMinorVersion(rangeVersion) &&
+        compareVersions(version, rangeVersion) >= 0
+      )
+
     default:
       // 对于复杂范围，简单比较主版本
       return extractMajorVersion(version) === extractMajorVersion(rangeVersion)
@@ -145,9 +156,12 @@ export function satisfiesVersionRange(version: string, range: string): boolean {
  * @param type 版本类型偏好
  * @returns 格式化的版本字符串
  */
-export function formatVersionString(version: string, type: 'exact' | 'caret' | 'tilde' = 'caret'): string {
+export function formatVersionString(
+  version: string,
+  type: 'exact' | 'caret' | 'tilde' = 'caret'
+): string {
   const cleanVersion = version.replace(/^[\^~]/, '')
-  
+
   switch (type) {
     case 'exact':
       return cleanVersion

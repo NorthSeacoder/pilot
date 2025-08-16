@@ -1,11 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { 
-  safeAsync, 
-  safeSync, 
-  safeReadFile, 
-  safeParseJSON, 
-  safeBatch 
-} from './error-handler'
+import { safeAsync, safeSync, safeReadFile, safeParseJSON, safeBatch } from './error-handler'
 
 describe('Error Handler Utils', () => {
   // Mock console.warn to avoid cluttering test output
@@ -23,9 +17,9 @@ describe('Error Handler Utils', () => {
     it('应该成功执行异步操作', async () => {
       const operation = vi.fn().mockResolvedValue('success')
       const context = { operation: '测试操作' }
-      
+
       const result = await safeAsync(operation, context, 'fallback')
-      
+
       expect(result).toBe('success')
       expect(operation).toHaveBeenCalledOnce()
       expect(console.warn).not.toHaveBeenCalled()
@@ -34,15 +28,15 @@ describe('Error Handler Utils', () => {
     it('应该在错误时返回fallback值', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('测试错误'))
       const context = { operation: '测试操作', filePath: '/test/file.txt' }
-      
+
       const result = await safeAsync(operation, context, 'fallback')
-      
+
       expect(result).toBe('fallback')
       expect(console.warn).toHaveBeenCalledWith(
         '[测试操作] 操作失败:',
         expect.objectContaining({
           error: '测试错误',
-          filePath: '/test/file.txt'
+          filePath: '/test/file.txt',
         })
       )
     })
@@ -50,14 +44,14 @@ describe('Error Handler Utils', () => {
     it('应该处理非Error类型的异常', async () => {
       const operation = vi.fn().mockRejectedValue('字符串错误')
       const context = { operation: '测试操作' }
-      
+
       const result = await safeAsync(operation, context, 'fallback')
-      
+
       expect(result).toBe('fallback')
       expect(console.warn).toHaveBeenCalledWith(
         '[测试操作] 操作失败:',
         expect.objectContaining({
-          error: '字符串错误'
+          error: '字符串错误',
         })
       )
     })
@@ -67,15 +61,15 @@ describe('Error Handler Utils', () => {
       const context = {
         operation: '测试操作',
         filePath: '/test/file.txt',
-        details: { key: 'value' }
+        details: { key: 'value' },
       }
-      
+
       await safeAsync(operation, context, 'fallback')
-      
+
       expect(console.warn).toHaveBeenCalledWith(
         '[测试操作] 操作失败:',
         expect.objectContaining({
-          details: { key: 'value' }
+          details: { key: 'value' },
         })
       )
     })
@@ -85,9 +79,9 @@ describe('Error Handler Utils', () => {
     it('应该成功执行同步操作', () => {
       const operation = vi.fn().mockReturnValue('success')
       const context = { operation: '同步测试' }
-      
+
       const result = safeSync(operation, context, 'fallback')
-      
+
       expect(result).toBe('success')
       expect(operation).toHaveBeenCalledOnce()
       expect(console.warn).not.toHaveBeenCalled()
@@ -98,14 +92,14 @@ describe('Error Handler Utils', () => {
         throw new Error('同步错误')
       })
       const context = { operation: '同步测试' }
-      
+
       const result = safeSync(operation, context, 'fallback')
-      
+
       expect(result).toBe('fallback')
       expect(console.warn).toHaveBeenCalledWith(
         '[同步测试] 操作失败:',
         expect.objectContaining({
-          error: '同步错误'
+          error: '同步错误',
         })
       )
     })
@@ -116,11 +110,11 @@ describe('Error Handler Utils', () => {
       // Mock node:fs/promises
       const mockReadFile = vi.fn().mockResolvedValue('文件内容')
       vi.doMock('node:fs/promises', () => ({
-        readFile: mockReadFile
+        readFile: mockReadFile,
       }))
 
       const result = await safeReadFile('/test/file.txt')
-      
+
       expect(result).toBe('文件内容')
       expect(mockReadFile).toHaveBeenCalledWith('/test/file.txt', 'utf-8')
     })
@@ -128,17 +122,17 @@ describe('Error Handler Utils', () => {
     it('应该在文件读取失败时返回null', async () => {
       const mockReadFile = vi.fn().mockRejectedValue(new Error('文件不存在'))
       vi.doMock('node:fs/promises', () => ({
-        readFile: mockReadFile
+        readFile: mockReadFile,
       }))
 
       const result = await safeReadFile('/test/nonexistent.txt')
-      
+
       expect(result).toBe(null)
       expect(console.warn).toHaveBeenCalledWith(
         '[文件读取] 操作失败:',
         expect.objectContaining({
           error: '文件不存在',
-          filePath: '/test/nonexistent.txt'
+          filePath: '/test/nonexistent.txt',
         })
       )
     })
@@ -146,11 +140,11 @@ describe('Error Handler Utils', () => {
     it('应该支持自定义编码', async () => {
       const mockReadFile = vi.fn().mockResolvedValue('内容')
       vi.doMock('node:fs/promises', () => ({
-        readFile: mockReadFile
+        readFile: mockReadFile,
       }))
 
       await safeReadFile('/test/file.txt', 'ascii')
-      
+
       expect(mockReadFile).toHaveBeenCalledWith('/test/file.txt', 'ascii')
     })
   })
@@ -159,9 +153,9 @@ describe('Error Handler Utils', () => {
     it('应该成功解析有效的JSON', () => {
       const jsonString = '{"key": "value"}'
       const context = { operation: 'JSON解析测试' }
-      
+
       const result = safeParseJSON(jsonString, context)
-      
+
       expect(result).toEqual({ key: 'value' })
       expect(console.warn).not.toHaveBeenCalled()
     })
@@ -169,14 +163,14 @@ describe('Error Handler Utils', () => {
     it('应该在JSON解析失败时返回null', () => {
       const invalidJson = '{ invalid json }'
       const context = { operation: 'JSON解析测试', filePath: '/test/config.json' }
-      
+
       const result = safeParseJSON(invalidJson, context)
-      
+
       expect(result).toBe(null)
       expect(console.warn).toHaveBeenCalledWith(
         '[JSON解析测试 - JSON解析] 操作失败:',
         expect.objectContaining({
-          filePath: '/test/config.json'
+          filePath: '/test/config.json',
         })
       )
     })
@@ -185,16 +179,16 @@ describe('Error Handler Utils', () => {
       const complexJson = JSON.stringify({
         array: [1, 2, 3],
         nested: { deep: { value: true } },
-        nullValue: null
+        nullValue: null,
       })
       const context = { operation: '复杂JSON解析' }
-      
+
       const result = safeParseJSON(complexJson, context)
-      
+
       expect(result).toEqual({
         array: [1, 2, 3],
         nested: { deep: { value: true } },
-        nullValue: null
+        nullValue: null,
       })
     })
 
@@ -203,12 +197,12 @@ describe('Error Handler Utils', () => {
         name: string
         age: number
       }
-      
+
       const jsonString = '{"name": "test", "age": 25}'
       const context = { operation: '类型化JSON解析' }
-      
+
       const result = safeParseJSON<TestType>(jsonString, context)
-      
+
       expect(result?.name).toBe('test')
       expect(result?.age).toBe(25)
     })
@@ -220,17 +214,17 @@ describe('Error Handler Utils', () => {
         {
           operation: vi.fn().mockResolvedValue('result1'),
           context: { operation: '操作1' },
-          fallback: 'fallback1'
+          fallback: 'fallback1',
         },
         {
           operation: vi.fn().mockResolvedValue('result2'),
           context: { operation: '操作2' },
-          fallback: 'fallback2'
-        }
+          fallback: 'fallback2',
+        },
       ]
-      
+
       const results = await safeBatch(operations)
-      
+
       expect(results).toEqual(['result1', 'result2'])
       expect(operations[0]?.operation).toHaveBeenCalledOnce()
       expect(operations[1]?.operation).toHaveBeenCalledOnce()
@@ -241,48 +235,48 @@ describe('Error Handler Utils', () => {
         {
           operation: vi.fn().mockResolvedValue('success'),
           context: { operation: '成功操作' },
-          fallback: 'fallback1'
+          fallback: 'fallback1',
         },
         {
           operation: vi.fn().mockRejectedValue(new Error('失败')),
           context: { operation: '失败操作' },
-          fallback: 'fallback2'
-        }
+          fallback: 'fallback2',
+        },
       ]
-      
+
       const results = await safeBatch(operations)
-      
+
       expect(results).toEqual(['success', 'fallback2'])
       expect(console.warn).toHaveBeenCalledWith(
         '[失败操作] 操作失败:',
         expect.objectContaining({
-          error: '失败'
+          error: '失败',
         })
       )
     })
 
     it('应该处理空操作数组', async () => {
       const results = await safeBatch([])
-      
+
       expect(results).toEqual([])
     })
 
     it('应该保持操作结果的顺序', async () => {
       const operations = [
         {
-          operation: () => new Promise(resolve => setTimeout(() => resolve('slow'), 100)),
+          operation: () => new Promise((resolve) => setTimeout(() => resolve('slow'), 100)),
           context: { operation: '慢操作' },
-          fallback: 'fallback1'
+          fallback: 'fallback1',
         },
         {
           operation: () => Promise.resolve('fast'),
           context: { operation: '快操作' },
-          fallback: 'fallback2'
-        }
+          fallback: 'fallback2',
+        },
       ]
-      
+
       const results = await safeBatch(operations)
-      
+
       expect(results).toEqual(['slow', 'fast'])
     })
   })

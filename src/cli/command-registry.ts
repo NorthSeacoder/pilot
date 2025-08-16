@@ -60,7 +60,7 @@ export class CommandRegistry {
    */
   private setupCommand(cliCommand: CLICommand, parent: Command): void {
     const command = parent.command(cliCommand.name)
-    
+
     if (cliCommand.description) {
       command.description(cliCommand.description)
     }
@@ -114,41 +114,41 @@ export const COMMAND_TEMPLATES = {
     options: [
       {
         flags: '--config',
-        description: '仅生成配置文件'
+        description: '仅生成配置文件',
       },
       {
         flags: '--rules',
-        description: '仅生成 AI 规则文件'
+        description: '仅生成 AI 规则文件',
       },
       {
         flags: '--deps',
-        description: '仅安装依赖'
+        description: '仅安装依赖',
       },
       {
         flags: '--setup',
-        description: '仅生成测试设置文件'
+        description: '仅生成测试设置文件',
       },
       {
         flags: '--no-install',
-        description: '跳过依赖安装'
+        description: '跳过依赖安装',
       },
       {
         flags: '--dry-run',
-        description: '预览模式，显示将要执行的操作但不实际执行'
+        description: '预览模式，显示将要执行的操作但不实际执行',
       },
       {
         flags: '--stack <stack>',
-        description: '覆盖自动检测的技术栈 (react|vue2|vue3)'
+        description: '覆盖自动检测的技术栈 (react|vue2|vue3)',
       },
       {
         flags: '--arch <arch>',
-        description: '覆盖自动检测的架构 (single|pnpm-workspace|yarn-workspace)'
+        description: '覆盖自动检测的架构 (single|pnpm-workspace|yarn-workspace)',
       },
       {
         flags: '-v, --verbose',
-        description: '显示详细的操作日志和调试信息'
-      }
-    ]
+        description: '显示详细的操作日志和调试信息',
+      },
+    ],
   } as CLICommand,
 
   /**
@@ -161,21 +161,21 @@ export const COMMAND_TEMPLATES = {
     options: [
       {
         flags: '--keep-config',
-        description: '保留配置文件'
+        description: '保留配置文件',
       },
       {
         flags: '--keep-deps',
-        description: '保留依赖包'
+        description: '保留依赖包',
       },
       {
         flags: '--dry-run',
-        description: '预览模式'
+        description: '预览模式',
       },
       {
         flags: '-v, --verbose',
-        description: '显示详细日志'
-      }
-    ]
+        description: '显示详细日志',
+      },
+    ],
   } as CLICommand,
 
   /**
@@ -188,13 +188,13 @@ export const COMMAND_TEMPLATES = {
     options: [
       {
         flags: '--json',
-        description: '以 JSON 格式输出'
+        description: '以 JSON 格式输出',
       },
       {
         flags: '--verbose',
-        description: '显示详细信息'
-      }
-    ]
+        description: '显示详细信息',
+      },
+    ],
   } as CLICommand,
 
   /**
@@ -206,13 +206,13 @@ export const COMMAND_TEMPLATES = {
     options: [
       {
         flags: '--check',
-        description: '检查配置完整性'
+        description: '检查配置完整性',
       },
       {
         flags: '--json',
-        description: '以 JSON 格式输出'
-      }
-    ]
+        description: '以 JSON 格式输出',
+      },
+    ],
   } as CLICommand,
 
   /**
@@ -224,18 +224,18 @@ export const COMMAND_TEMPLATES = {
     options: [
       {
         flags: '--all',
-        description: '更新所有模块'
+        description: '更新所有模块',
       },
       {
         flags: '--dry-run',
-        description: '预览模式'
+        description: '预览模式',
       },
       {
         flags: '--force',
-        description: '强制更新，覆盖本地修改'
-      }
-    ]
-  } as CLICommand
+        description: '强制更新，覆盖本地修改',
+      },
+    ],
+  } as CLICommand,
 }
 
 /**

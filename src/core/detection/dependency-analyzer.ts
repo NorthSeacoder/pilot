@@ -98,18 +98,23 @@ export async function analyzeProjectDependencies(
 ): Promise<DependencyAnalysis> {
   const existingDependencies = await analyzeDependencyVersions(packageJson)
   const compatibilityMatrix = getCompatibilityMatrix()
-  
+
   // 获取推荐的测试依赖
-  const recommendations = getRecommendedDependencies(techStack, isTypeScript, existingDependencies, compatibilityMatrix)
-  
+  const recommendations = getRecommendedDependencies(
+    techStack,
+    isTypeScript,
+    existingDependencies,
+    compatibilityMatrix
+  )
+
   // 检测冲突
   const conflicts = detectDependencyConflicts(existingDependencies, recommendations)
-  
+
   return {
     existingDependencies,
     conflicts,
     recommendations,
-    compatibilityMatrix
+    compatibilityMatrix,
   }
 }
 
@@ -126,23 +131,23 @@ export async function analyzeProjectDependenciesV2(
 ): Promise<DependencyAnalysis> {
   const existingDependencies = await analyzeDependencyVersions(packageJson)
   const compatibilityMatrix = getCompatibilityMatrix()
-  
+
   // 使用新的 V3 API 获取推荐的测试依赖
   const recommendations = getRecommendedDependenciesV3(
-    techStack, 
-    isTypeScript, 
-    existingDependencies, 
+    techStack,
+    isTypeScript,
+    existingDependencies,
     frameworkManager
   )
-  
+
   // 检测冲突
   const conflicts = detectDependencyConflicts(existingDependencies, recommendations)
-  
+
   return {
     existingDependencies,
     conflicts,
     recommendations,
-    compatibilityMatrix
+    compatibilityMatrix,
   }
 }
 
@@ -167,8 +172,8 @@ export function getCompatibilityMatrix(): CompatibilityMatrix {
           { name: '@testing-library/react', version: '^14.0.0', dev: true },
           { name: '@testing-library/jest-dom', version: '^6.0.0', dev: true },
           { name: '@testing-library/user-event', version: '^14.0.0', dev: true },
-          { name: '@types/react', version: '^18.0.0', dev: true, optional: true }
-        ]
+          { name: '@types/react', version: '^18.0.0', dev: true, optional: true },
+        ],
       },
       '17': {
         testingLibrary: '^12.0.0',
@@ -178,8 +183,8 @@ export function getCompatibilityMatrix(): CompatibilityMatrix {
           { name: '@testing-library/react', version: '^12.0.0', dev: true },
           { name: '@testing-library/jest-dom', version: '^5.0.0', dev: true },
           { name: '@testing-library/user-event', version: '^14.0.0', dev: true },
-          { name: '@types/react', version: '^17.0.0', dev: true, optional: true }
-        ]
+          { name: '@types/react', version: '^17.0.0', dev: true, optional: true },
+        ],
       },
       '16': {
         testingLibrary: '^11.0.0',
@@ -189,9 +194,9 @@ export function getCompatibilityMatrix(): CompatibilityMatrix {
           { name: '@testing-library/react', version: '^11.0.0', dev: true },
           { name: '@testing-library/jest-dom', version: '^5.0.0', dev: true },
           { name: '@testing-library/user-event', version: '^13.0.0', dev: true },
-          { name: '@types/react', version: '^16.0.0', dev: true, optional: true }
-        ]
-      }
+          { name: '@types/react', version: '^16.0.0', dev: true, optional: true },
+        ],
+      },
     },
     vue: {
       '3': {
@@ -202,8 +207,8 @@ export function getCompatibilityMatrix(): CompatibilityMatrix {
           { name: '@vue/test-utils', version: '^2.0.0', dev: true },
           { name: '@testing-library/vue', version: '^7.0.0', dev: true },
           { name: '@testing-library/jest-dom', version: '^6.0.0', dev: true },
-          { name: '@testing-library/user-event', version: '^14.0.0', dev: true }
-        ]
+          { name: '@testing-library/user-event', version: '^14.0.0', dev: true },
+        ],
       },
       '2': {
         testingLibrary: '^5.0.0',
@@ -214,10 +219,10 @@ export function getCompatibilityMatrix(): CompatibilityMatrix {
           { name: '@testing-library/vue', version: '^5.0.0', dev: true },
           { name: '@testing-library/jest-dom', version: '^5.0.0', dev: true },
           { name: '@testing-library/user-event', version: '^14.0.0', dev: true },
-          { name: 'vue-template-compiler', version: '^2.7.0', dev: true }
-        ]
-      }
-    }
+          { name: 'vue-template-compiler', version: '^2.7.0', dev: true },
+        ],
+      },
+    },
   }
 }
 
@@ -231,19 +236,19 @@ export function getRecommendedDependencies(
   compatibilityMatrix: CompatibilityMatrix
 ): DependencySpec[] {
   const recommendations: DependencySpec[] = []
-  
+
   // 基础测试依赖
   recommendations.push(
     { name: 'vitest', version: getCompatibleVitestVersion(existingDependencies), dev: true },
     { name: '@vitest/ui', version: '^2.0.0', dev: true }
   )
-  
+
   // 根据技术栈添加特定依赖
   if (techStack === 'react') {
     const reactVersionString = existingDependencies.react || '^18.0.0'
     const reactVersion = extractMajorVersion(reactVersionString)
     const matrix = compatibilityMatrix.react?.[reactVersion] || compatibilityMatrix.react?.['18']
-    
+
     if (matrix) {
       recommendations.push(...matrix.additionalDeps)
       recommendations.push({ name: 'jsdom', version: matrix.jsdom, dev: true })
@@ -251,13 +256,13 @@ export function getRecommendedDependencies(
   } else if (techStack === 'vue2' || techStack === 'vue3') {
     const vueVersion = techStack === 'vue3' ? '3' : '2'
     const matrix = compatibilityMatrix.vue?.[vueVersion]
-    
+
     if (matrix) {
       recommendations.push(...matrix.additionalDeps)
       recommendations.push({ name: 'jsdom', version: matrix.jsdom, dev: true })
     }
   }
-  
+
   // TypeScript 相关依赖
   if (isTypeScript) {
     recommendations.push(
@@ -265,7 +270,7 @@ export function getRecommendedDependencies(
       { name: '@types/node', version: '^20.0.0', dev: true }
     )
   }
-  
+
   return recommendations
 }
 
@@ -273,35 +278,37 @@ export function getRecommendedDependencies(
  * 使用框架依赖管理器获取推荐依赖（新的推荐方式）
  * @deprecated 使用 getRecommendedDependenciesV3 替代，避免动态导入
  */
-export function getRecommendedDependenciesV2(
+export async function getRecommendedDependenciesV2(
   techStack: TechStack,
   isTypeScript: boolean,
   existingDependencies: Record<string, string>
-): DependencySpec[] {
+): Promise<DependencySpec[]> {
   // 动态导入框架依赖管理器以避免循环依赖
-  const { FrameworkDependencyManager } = require('../../modules/testing/framework-dependency-manager')
-  
+  const { FrameworkDependencyManager } = await import(
+    '../../modules/testing/framework-dependency-manager'
+  )
+
   const recommendations: DependencySpec[] = []
-  
+
   // 基础测试依赖
   recommendations.push(
     { name: 'vitest', version: getCompatibleVitestVersion(existingDependencies), dev: true },
     { name: '@vitest/ui', version: '^2.0.0', dev: true },
     { name: 'jsdom', version: getCompatibleJsdomVersion(existingDependencies), dev: true }
   )
-  
+
   // 获取框架版本
   const frameworkVersion = getFrameworkVersion(techStack, existingDependencies)
-  
+
   // 添加框架特定依赖
   const frameworkDeps = FrameworkDependencyManager.getAllDependencies(
     techStack,
     frameworkVersion,
     isTypeScript
   )
-  
+
   recommendations.push(...frameworkDeps)
-  
+
   return recommendations
 }
 
@@ -317,28 +324,35 @@ export function getRecommendedDependenciesV3(
   }
 ): DependencySpec[] {
   const recommendations: DependencySpec[] = []
-  
+
   // 基础测试依赖
   recommendations.push(
     { name: 'vitest', version: getCompatibleVitestVersion(existingDependencies), dev: true },
     { name: '@vitest/ui', version: '^2.0.0', dev: true },
     { name: 'jsdom', version: getCompatibleJsdomVersion(existingDependencies), dev: true }
   )
-  
+
   // 如果提供了框架管理器，使用它获取框架特定依赖
   if (frameworkManager) {
     const frameworkVersion = getFrameworkVersion(techStack, existingDependencies)
-    const frameworkDeps = frameworkManager.getAllDependencies(techStack, frameworkVersion, isTypeScript)
+    const frameworkDeps = frameworkManager.getAllDependencies(
+      techStack,
+      frameworkVersion,
+      isTypeScript
+    )
     recommendations.push(...frameworkDeps)
   }
-  
+
   return recommendations
 }
 
 /**
  * 获取框架版本
  */
-function getFrameworkVersion(techStack: TechStack, existingDependencies: Record<string, string>): string {
+function getFrameworkVersion(
+  techStack: TechStack,
+  existingDependencies: Record<string, string>
+): string {
   switch (techStack) {
     case 'react':
       return existingDependencies.react || '^18.0.0'
@@ -356,7 +370,7 @@ function getFrameworkVersion(techStack: TechStack, existingDependencies: Record<
 function getCompatibleJsdomVersion(_existingDependencies: Record<string, string>): string {
   const nodeVersion = getNodeVersion()
   const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0] || '18')
-  
+
   if (nodeMajor >= 18) {
     return '^25.0.0'
   } else if (nodeMajor >= 16) {
@@ -375,29 +389,34 @@ export function detectDependencyConflicts(
 ): ConflictReport {
   const conflicts: ConflictInfo[] = []
   const resolutions: ConflictResolution[] = []
-  
+
   for (const rec of recommendations) {
     const existing = existingDependencies[rec.name]
-    
+
     if (existing && rec.version) {
       const conflict = analyzeVersionConflict(rec.name, existing, rec.version)
-      
+
       if (conflict) {
         conflicts.push(conflict)
-        
+
         // 生成解决方案
-        const resolution = generateConflictResolution(rec.name, existing, rec.version, conflict.severity)
+        const resolution = generateConflictResolution(
+          rec.name,
+          existing,
+          rec.version,
+          conflict.severity
+        )
         if (resolution) {
           resolutions.push(resolution)
         }
       }
     }
   }
-  
+
   return {
     hasConflicts: conflicts.length > 0,
     conflicts,
-    resolutions
+    resolutions,
   }
 }
 
@@ -411,30 +430,30 @@ function analyzeVersionConflict(
 ): ConflictInfo | null {
   const existingMajor = extractMajorVersion(existingVersion)
   const requiredMajor = extractMajorVersion(requiredVersion)
-  
+
   if (existingMajor !== requiredMajor) {
     return {
       dependency,
       existingVersion,
       requiredVersion,
       severity: 'error',
-      description: `主版本不兼容: 现有版本 ${existingVersion}, 需要版本 ${requiredVersion}`
+      description: `主版本不兼容: 现有版本 ${existingVersion}, 需要版本 ${requiredVersion}`,
     }
   }
-  
+
   const existingMinor = extractMinorVersion(existingVersion)
   const requiredMinor = extractMinorVersion(requiredVersion)
-  
+
   if (existingMinor < requiredMinor) {
     return {
       dependency,
       existingVersion,
       requiredVersion,
       severity: 'warning',
-      description: `次版本过低: 现有版本 ${existingVersion}, 建议版本 ${requiredVersion}`
+      description: `次版本过低: 现有版本 ${existingVersion}, 建议版本 ${requiredVersion}`,
     }
   }
-  
+
   return null
 }
 
@@ -449,27 +468,27 @@ function generateConflictResolution(
 ): ConflictResolution | null {
   const existingMajor = extractMajorVersion(existingVersion)
   const requiredMajor = extractMajorVersion(requiredVersion)
-  
+
   if (severity === 'error' && existingMajor !== requiredMajor) {
     return {
       type: 'upgrade',
       dependency,
       fromVersion: existingVersion,
       toVersion: requiredVersion,
-      reason: `主版本不兼容，需要升级到 ${requiredVersion}`
+      reason: `主版本不兼容，需要升级到 ${requiredVersion}`,
     }
   }
-  
+
   if (severity === 'warning') {
     return {
       type: 'upgrade',
       dependency,
       fromVersion: existingVersion,
       toVersion: requiredVersion,
-      reason: `建议升级到更新版本以获得更好的兼容性`
+      reason: `建议升级到更新版本以获得更好的兼容性`,
     }
   }
-  
+
   return null
 }
 
@@ -479,7 +498,7 @@ function generateConflictResolution(
 function getCompatibleVitestVersion(existingDependencies: Record<string, string>): string {
   const nodeVersion = getNodeVersion()
   const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0] || '18')
-  
+
   // 检查是否有 Vite 依赖，确保兼容性
   const viteVersion = existingDependencies.vite
   if (viteVersion) {
@@ -490,7 +509,7 @@ function getCompatibleVitestVersion(existingDependencies: Record<string, string>
       return '^1.0.0'
     }
   }
-  
+
   // 基于 Node.js 版本选择
   if (nodeMajor >= 18) {
     return '^2.0.0'
@@ -515,7 +534,7 @@ export function checkVersionCompatibility(
   if (dependencyVersions.react) {
     const reactVersion = dependencyVersions.react
     compatibility.react = reactVersion
-    
+
     const majorVersion = extractMajorVersion(reactVersion)
     if (majorVersion >= 18) {
       compatibility.compatibleTestingLibrary = '^14.0.0'
@@ -530,7 +549,7 @@ export function checkVersionCompatibility(
   if (dependencyVersions.vue) {
     const vueVersion = dependencyVersions.vue
     compatibility.vue = vueVersion
-    
+
     const majorVersion = extractMajorVersion(vueVersion)
     if (majorVersion >= 3) {
       compatibility.compatibleTestingLibrary = '^7.0.0'

@@ -9,7 +9,7 @@ import {
   checkVersionCompatibility,
   getNodeVersion,
   type DependencySpec,
-  type CompatibilityMatrix
+  type CompatibilityMatrix,
 } from './dependency-analyzer'
 // import type { TechStack } from '../../types' // 暂时不需要导入
 
@@ -24,12 +24,12 @@ describe('dependency-analyzer', () => {
       const packageJson = {
         dependencies: {
           react: '^18.2.0',
-          'react-dom': '^18.2.0'
+          'react-dom': '^18.2.0',
         },
         devDependencies: {
           typescript: '^5.0.0',
-          vitest: '^1.0.0'
-        }
+          vitest: '^1.0.0',
+        },
       }
 
       const result = await analyzeDependencyVersions(packageJson)
@@ -38,7 +38,7 @@ describe('dependency-analyzer', () => {
         react: '^18.2.0',
         'react-dom': '^18.2.0',
         typescript: '^5.0.0',
-        vitest: '^1.0.0'
+        vitest: '^1.0.0',
       })
     })
 
@@ -53,14 +53,14 @@ describe('dependency-analyzer', () => {
         dependencies: {
           react: '^18.2.0',
           'local-package': 'file:../local',
-          'git-package': { git: 'https://github.com/user/repo.git' }
-        }
+          'git-package': { git: 'https://github.com/user/repo.git' },
+        },
       }
 
       const result = await analyzeDependencyVersions(packageJson)
       expect(result).toEqual({
         react: '^18.2.0',
-        'local-package': 'file:../local'
+        'local-package': 'file:../local',
       })
     })
   })
@@ -71,7 +71,7 @@ describe('dependency-analyzer', () => {
 
       expect(matrix).toHaveProperty('react')
       expect(matrix).toHaveProperty('vue')
-      
+
       // Check React 18 compatibility
       expect(matrix.react?.['18']).toEqual({
         testingLibrary: '^14.0.0',
@@ -80,8 +80,8 @@ describe('dependency-analyzer', () => {
         additionalDeps: expect.arrayContaining([
           expect.objectContaining({ name: '@testing-library/react' }),
           expect.objectContaining({ name: '@testing-library/jest-dom' }),
-          expect.objectContaining({ name: '@testing-library/user-event' })
-        ])
+          expect.objectContaining({ name: '@testing-library/user-event' }),
+        ]),
       })
 
       // Check Vue 3 compatibility
@@ -91,8 +91,8 @@ describe('dependency-analyzer', () => {
         jsdom: '^25.0.0',
         additionalDeps: expect.arrayContaining([
           expect.objectContaining({ name: '@vue/test-utils' }),
-          expect.objectContaining({ name: '@testing-library/vue' })
-        ])
+          expect.objectContaining({ name: '@testing-library/vue' }),
+        ]),
       })
     })
   })
@@ -119,7 +119,7 @@ describe('dependency-analyzer', () => {
           expect.objectContaining({ name: '@vitest/ui' }),
           expect.objectContaining({ name: '@testing-library/react' }),
           expect.objectContaining({ name: '@testing-library/jest-dom' }),
-          expect.objectContaining({ name: 'jsdom' })
+          expect.objectContaining({ name: 'jsdom' }),
         ])
       )
     })
@@ -138,7 +138,7 @@ describe('dependency-analyzer', () => {
           expect.objectContaining({ name: 'vitest' }),
           expect.objectContaining({ name: '@vue/test-utils' }),
           expect.objectContaining({ name: '@testing-library/vue' }),
-          expect.objectContaining({ name: 'jsdom' })
+          expect.objectContaining({ name: 'jsdom' }),
         ])
       )
     })
@@ -155,7 +155,7 @@ describe('dependency-analyzer', () => {
       expect(recommendations).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: '@vue/test-utils' }),
-          expect.objectContaining({ name: 'vue-template-compiler' })
+          expect.objectContaining({ name: 'vue-template-compiler' }),
         ])
       )
     })
@@ -172,7 +172,7 @@ describe('dependency-analyzer', () => {
       expect(recommendations).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: '@types/jsdom' }),
-          expect.objectContaining({ name: '@types/node' })
+          expect.objectContaining({ name: '@types/node' }),
         ])
       )
     })
@@ -186,7 +186,7 @@ describe('dependency-analyzer', () => {
         compatibilityMatrix
       )
 
-      const vitestDep = recommendations.find(dep => dep.name === 'vitest')
+      const vitestDep = recommendations.find((dep) => dep.name === 'vitest')
       expect(vitestDep?.version).toBe('^2.0.0')
     })
   })
@@ -194,9 +194,7 @@ describe('dependency-analyzer', () => {
   describe('detectDependencyConflicts', () => {
     it('should detect major version conflicts', () => {
       const existingDependencies = { vitest: '^1.0.0' }
-      const recommendations: DependencySpec[] = [
-        { name: 'vitest', version: '^2.0.0', dev: true }
-      ]
+      const recommendations: DependencySpec[] = [{ name: 'vitest', version: '^2.0.0', dev: true }]
 
       const result = detectDependencyConflicts(existingDependencies, recommendations)
 
@@ -207,14 +205,14 @@ describe('dependency-analyzer', () => {
         existingVersion: '^1.0.0',
         requiredVersion: '^2.0.0',
         severity: 'error',
-        description: expect.stringContaining('主版本不兼容')
+        description: expect.stringContaining('主版本不兼容'),
       })
     })
 
     it('should detect minor version warnings', () => {
       const existingDependencies = { '@testing-library/react': '^12.0.0' }
       const recommendations: DependencySpec[] = [
-        { name: '@testing-library/react', version: '^14.0.0', dev: true }
+        { name: '@testing-library/react', version: '^14.0.0', dev: true },
       ]
 
       const result = detectDependencyConflicts(existingDependencies, recommendations)
@@ -225,9 +223,7 @@ describe('dependency-analyzer', () => {
 
     it('should not report conflicts for compatible versions', () => {
       const existingDependencies = { vitest: '^2.1.0' }
-      const recommendations: DependencySpec[] = [
-        { name: 'vitest', version: '^2.0.0', dev: true }
-      ]
+      const recommendations: DependencySpec[] = [{ name: 'vitest', version: '^2.0.0', dev: true }]
 
       const result = detectDependencyConflicts(existingDependencies, recommendations)
 
@@ -237,9 +233,7 @@ describe('dependency-analyzer', () => {
 
     it('should generate conflict resolutions', () => {
       const existingDependencies = { vitest: '^1.0.0' }
-      const recommendations: DependencySpec[] = [
-        { name: 'vitest', version: '^2.0.0', dev: true }
-      ]
+      const recommendations: DependencySpec[] = [{ name: 'vitest', version: '^2.0.0', dev: true }]
 
       const result = detectDependencyConflicts(existingDependencies, recommendations)
 
@@ -249,7 +243,7 @@ describe('dependency-analyzer', () => {
         dependency: 'vitest',
         fromVersion: '^1.0.0',
         toVersion: '^2.0.0',
-        reason: expect.stringContaining('主版本不兼容')
+        reason: expect.stringContaining('主版本不兼容'),
       })
     })
   })
@@ -259,12 +253,12 @@ describe('dependency-analyzer', () => {
       const packageJson = {
         dependencies: {
           react: '^18.2.0',
-          'react-dom': '^18.2.0'
+          'react-dom': '^18.2.0',
         },
         devDependencies: {
           typescript: '^5.0.0',
-          vitest: '^1.0.0'
-        }
+          vitest: '^1.0.0',
+        },
       }
 
       const result = await analyzeProjectDependencies(packageJson, 'react', true)
@@ -278,14 +272,14 @@ describe('dependency-analyzer', () => {
         react: '^18.2.0',
         'react-dom': '^18.2.0',
         typescript: '^5.0.0',
-        vitest: '^1.0.0'
+        vitest: '^1.0.0',
       })
 
       expect(result.recommendations).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: 'vitest' }),
           expect.objectContaining({ name: '@testing-library/react' }),
-          expect.objectContaining({ name: '@types/jsdom' }) // TypeScript project
+          expect.objectContaining({ name: '@types/jsdom' }), // TypeScript project
         ])
       )
 
@@ -302,7 +296,7 @@ describe('dependency-analyzer', () => {
       expect(result).toEqual({
         react: '^18.2.0',
         compatibleTestingLibrary: '^14.0.0',
-        compatibleVitest: '^2.0.0'
+        compatibleVitest: '^2.0.0',
       })
     })
 
@@ -313,7 +307,7 @@ describe('dependency-analyzer', () => {
       expect(result).toEqual({
         vue: '^3.3.0',
         compatibleTestingLibrary: '^7.0.0',
-        compatibleVitest: '^2.0.0'
+        compatibleVitest: '^2.0.0',
       })
     })
 
@@ -342,22 +336,18 @@ describe('dependency-analyzer', () => {
   describe('getRecommendedDependenciesV3', () => {
     it('should return basic dependencies without framework manager', () => {
       const existingDependencies = { react: '^18.2.0' }
-      const recommendations = getRecommendedDependenciesV3(
-        'react',
-        false,
-        existingDependencies
-      )
+      const recommendations = getRecommendedDependenciesV3('react', false, existingDependencies)
 
       expect(recommendations).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ name: 'vitest' }),
           expect.objectContaining({ name: '@vitest/ui' }),
-          expect.objectContaining({ name: 'jsdom' })
+          expect.objectContaining({ name: 'jsdom' }),
         ])
       )
 
       // Should not include framework-specific dependencies without manager
-      expect(recommendations.find(dep => dep.name === '@testing-library/react')).toBeUndefined()
+      expect(recommendations.find((dep) => dep.name === '@testing-library/react')).toBeUndefined()
     })
 
     it('should include framework dependencies when manager is provided', () => {
@@ -365,8 +355,8 @@ describe('dependency-analyzer', () => {
       const mockFrameworkManager = {
         getAllDependencies: vi.fn().mockReturnValue([
           { name: '@testing-library/react', version: '^14.0.0', dev: true },
-          { name: '@testing-library/jest-dom', version: '^6.0.0', dev: true }
-        ])
+          { name: '@testing-library/jest-dom', version: '^6.0.0', dev: true },
+        ]),
       }
 
       const recommendations = getRecommendedDependenciesV3(
@@ -380,11 +370,15 @@ describe('dependency-analyzer', () => {
         expect.arrayContaining([
           expect.objectContaining({ name: 'vitest' }),
           expect.objectContaining({ name: '@testing-library/react' }),
-          expect.objectContaining({ name: '@testing-library/jest-dom' })
+          expect.objectContaining({ name: '@testing-library/jest-dom' }),
         ])
       )
 
-      expect(mockFrameworkManager.getAllDependencies).toHaveBeenCalledWith('react', '^18.2.0', false)
+      expect(mockFrameworkManager.getAllDependencies).toHaveBeenCalledWith(
+        'react',
+        '^18.2.0',
+        false
+      )
     })
 
     it('should handle TypeScript projects correctly', () => {
@@ -392,8 +386,8 @@ describe('dependency-analyzer', () => {
       const mockFrameworkManager = {
         getAllDependencies: vi.fn().mockReturnValue([
           { name: '@testing-library/react', version: '^14.0.0', dev: true },
-          { name: '@types/react', version: '^18.0.0', dev: true }
-        ])
+          { name: '@types/react', version: '^18.0.0', dev: true },
+        ]),
       }
 
       const recommendations = getRecommendedDependenciesV3(
@@ -405,9 +399,7 @@ describe('dependency-analyzer', () => {
 
       expect(mockFrameworkManager.getAllDependencies).toHaveBeenCalledWith('react', '^18.2.0', true)
       expect(recommendations).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ name: '@types/react' })
-        ])
+        expect.arrayContaining([expect.objectContaining({ name: '@types/react' })])
       )
     })
   })

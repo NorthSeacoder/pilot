@@ -30,11 +30,13 @@ describe('Enhanced Project Detection', () => {
     const { analyzeDependencyVersions, getNodeVersion } = await import('./dependency-analyzer')
 
     vi.mocked(findUp).mockResolvedValue('/test/project/package.json')
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      name: 'test-project',
-      dependencies: { react: '^18.2.0' },
-      devDependencies: { typescript: '^5.0.0', vitest: '^2.0.0' }
-    }))
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        name: 'test-project',
+        dependencies: { react: '^18.2.0' },
+        devDependencies: { typescript: '^5.0.0', vitest: '^2.0.0' },
+      })
+    )
     vi.mocked(detectFramework).mockResolvedValue('react')
     vi.mocked(detectArchitecture).mockResolvedValue('single')
     vi.mocked(detectPackageManager).mockResolvedValue('npm')
@@ -42,12 +44,12 @@ describe('Enhanced Project Detection', () => {
     vi.mocked(detectExistingTests).mockResolvedValue({
       hasExistingTests: true,
       existingTestFrameworks: ['vitest'],
-      existingConfigs: []
+      existingConfigs: [],
     })
     vi.mocked(analyzeDependencyVersions).mockResolvedValue({
       react: '^18.2.0',
       typescript: '^5.0.0',
-      vitest: '^2.0.0'
+      vitest: '^2.0.0',
     })
     vi.mocked(detectWorkspaceInfo).mockResolvedValue(undefined)
     vi.mocked(getNodeVersion).mockReturnValue('v18.17.1')
@@ -62,7 +64,7 @@ describe('Enhanced Project Detection', () => {
       isTypeScript: true,
       hasExistingTests: true,
       existingTestFrameworks: ['vitest'],
-      nodeVersion: 'v18.17.1'
+      nodeVersion: 'v18.17.1',
     })
   })
 
@@ -77,10 +79,12 @@ describe('Enhanced Project Detection', () => {
     const { analyzeDependencyVersions, getNodeVersion } = await import('./dependency-analyzer')
 
     vi.mocked(findUp).mockResolvedValue('/test/workspace/package.json')
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      name: 'workspace-root',
-      workspaces: ['packages/*']
-    }))
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        name: 'workspace-root',
+        workspaces: ['packages/*'],
+      })
+    )
     vi.mocked(detectFramework).mockResolvedValue('react')
     vi.mocked(detectArchitecture).mockResolvedValue('yarn-workspace')
     vi.mocked(detectPackageManager).mockResolvedValue('yarn')
@@ -88,7 +92,7 @@ describe('Enhanced Project Detection', () => {
     vi.mocked(detectExistingTests).mockResolvedValue({
       hasExistingTests: false,
       existingTestFrameworks: [],
-      existingConfigs: []
+      existingConfigs: [],
     })
     vi.mocked(analyzeDependencyVersions).mockResolvedValue({})
     vi.mocked(detectWorkspaceInfo).mockResolvedValue({
@@ -96,7 +100,7 @@ describe('Enhanced Project Detection', () => {
       packages: [],
       rootPackageJson: { name: 'workspace-root' },
       currentLocation: 'root',
-      currentPackage: undefined
+      currentPackage: undefined,
     })
     vi.mocked(getNodeVersion).mockReturnValue('v18.17.1')
 
@@ -111,8 +115,8 @@ describe('Enhanced Project Detection', () => {
       hasExistingTests: false,
       workspaceInfo: {
         type: 'yarn',
-        currentLocation: 'root'
-      }
+        currentLocation: 'root',
+      },
     })
   })
 
@@ -127,17 +131,19 @@ describe('Enhanced Project Detection', () => {
     const { analyzeDependencyVersions, getNodeVersion } = await import('./dependency-analyzer')
 
     vi.mocked(findUp).mockResolvedValue('/test/project/package.json')
-    vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-      name: 'test-project',
-      dependencies: { vue: '^3.0.0' }
-    }))
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        name: 'test-project',
+        dependencies: { vue: '^3.0.0' },
+      })
+    )
     vi.mocked(detectArchitecture).mockResolvedValue('single')
     vi.mocked(detectPackageManager).mockResolvedValue('npm')
     vi.mocked(detectTypeScript).mockResolvedValue(false)
     vi.mocked(detectExistingTests).mockResolvedValue({
       hasExistingTests: false,
       existingTestFrameworks: [],
-      existingConfigs: []
+      existingConfigs: [],
     })
     vi.mocked(analyzeDependencyVersions).mockResolvedValue({ vue: '^3.0.0' })
     vi.mocked(detectWorkspaceInfo).mockResolvedValue(undefined)
@@ -145,7 +151,7 @@ describe('Enhanced Project Detection', () => {
 
     const options: ModuleOptions = {
       stack: 'react', // Override detected Vue with React
-      arch: 'pnpm-workspace' // Override detected single with workspace
+      arch: 'pnpm-workspace', // Override detected single with workspace
     }
     const result = await detectProject(options)
 

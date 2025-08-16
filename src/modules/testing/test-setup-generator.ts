@@ -52,10 +52,10 @@ export class TestSetupGenerator {
 
     // 确定设置文件路径
     const setupPath = this.determineSetupPath(projectInfo)
-    
+
     // 检查现有设置
     const existingSetup = await this.detectExistingSetup(setupPath)
-    
+
     if (existingSetup && !options.dryRun) {
       if (options.force) {
         // 强制覆盖模式
@@ -75,14 +75,14 @@ export class TestSetupGenerator {
     const result: TestSetupResult = {
       content: setupContent,
       filePath: setupPath,
-      conflicts: []
+      conflicts: [],
     }
 
     if (!options.dryRun) {
       // 确保目录存在
       const setupDir = path.dirname(setupPath)
       await mkdir(setupDir, { recursive: true })
-      
+
       await writeFile(setupPath, setupContent, 'utf-8')
       if (options.verbose) {
         console.log(`✅ 测试设置文件已生成: ${setupPath}`)
@@ -162,7 +162,7 @@ export class TestSetupGenerator {
         existingValue: '已存在测试库设置',
         newValue: '新的测试库设置',
         severity: 'warning',
-        description: '检测到现有的测试库设置，建议手动合并或备份现有设置'
+        description: '检测到现有的测试库设置，建议手动合并或备份现有设置',
       })
 
       if (options.verbose) {
@@ -173,7 +173,7 @@ export class TestSetupGenerator {
       return {
         content: existingSetup.content,
         filePath: existingSetup.filePath,
-        conflicts
+        conflicts,
       }
     }
 
@@ -196,7 +196,7 @@ export class TestSetupGenerator {
     const result: TestSetupResult = {
       content: mergedContent,
       filePath: existingSetup.filePath,
-      conflicts
+      conflicts,
     }
 
     // 自动备份现有设置
@@ -206,7 +206,7 @@ export class TestSetupGenerator {
 
     if (!options.dryRun && (missingImports.length > 0 || missingSetup.length > 0)) {
       await writeFile(existingSetup.filePath, mergedContent, 'utf-8')
-      
+
       if (options.verbose) {
         console.log(`📁 备份现有设置: ${path.basename(backupPath)}`)
         console.log(`✅ 智能合并 ${path.basename(existingSetup.filePath)} (保留你的自定义设置)`)
@@ -244,16 +244,16 @@ export class TestSetupGenerator {
         variables.testingLibraryImport = "import { cleanup } from '@testing-library/vue'"
         variables.frameworkSpecificSetup = [
           "import Vue from 'vue'",
-          "// Suppress Vue production tip",
-          "Vue.config.productionTip = false"
+          '// Suppress Vue production tip',
+          'Vue.config.productionTip = false',
         ]
         break
       case 'vue3':
         variables.testingLibraryImport = "import { cleanup } from '@testing-library/vue'"
         variables.frameworkSpecificSetup = [
-          "// Mock URL.createObjectURL",
+          '// Mock URL.createObjectURL',
           "global.URL.createObjectURL = vi.fn(() => 'mocked-url')",
-          "global.URL.revokeObjectURL = vi.fn()"
+          'global.URL.revokeObjectURL = vi.fn()',
         ]
         break
     }
@@ -269,7 +269,7 @@ export class TestSetupGenerator {
     variables: Record<string, any>
   ): Promise<string> {
     const templateName = `${techStack}.template`
-    
+
     // 检测是否在源代码环境（开发/测试）还是构建后环境（生产）
     let templatesDir: string
     if (__dirname.includes('src/modules/testing')) {
@@ -279,12 +279,12 @@ export class TestSetupGenerator {
       // 生产环境：从 dist/cli 定位到 dist/modules/testing/templates
       templatesDir = path.join(__dirname, '..', 'modules', 'testing', 'templates')
     }
-    
+
     const templatePath = path.join(templatesDir, 'test-setup', templateName)
-    
+
     try {
       let template = await readFile(templatePath, 'utf-8')
-      
+
       // 替换模板变量
       for (const [key, value] of Object.entries(variables)) {
         const placeholder = `{{${key}}}`
@@ -292,7 +292,7 @@ export class TestSetupGenerator {
       }
 
       return template
-    } catch (error) {
+    } catch (_error) {
       console.warn(`警告: 无法读取模板文件 ${templatePath}，使用默认设置`)
       return this.generateDefaultSetup(techStack, variables)
     }
@@ -305,7 +305,7 @@ export class TestSetupGenerator {
     const missingImports: string[] = []
 
     // 检查基础导入
-    if (!existingContent.includes("@testing-library/jest-dom")) {
+    if (!existingContent.includes('@testing-library/jest-dom')) {
       missingImports.push("import '@testing-library/jest-dom'")
     }
 
@@ -411,7 +411,7 @@ afterEach(() => {
     const imports = [
       "import '@testing-library/jest-dom'",
       variables.testingLibraryImport,
-      "import { afterEach, beforeAll, vi } from 'vitest'"
+      "import { afterEach, beforeAll, vi } from 'vitest'",
     ]
 
     // 添加框架特定导入
@@ -439,15 +439,7 @@ global.console = {
   // error: vi.fn(),
 }`
 
-    return [
-      imports.join('\n'),
-      '',
-      cleanup,
-      '',
-      mockSetup,
-      '',
-      consoleSetup
-    ].join('\n')
+    return [imports.join('\n'), '', cleanup, '', mockSetup, '', consoleSetup].join('\n')
   }
 
   /**
@@ -489,12 +481,12 @@ export async function generateTestSetup(
   const context: TestSetupContext = {
     projectInfo,
     options,
-    templateVariables: {}
+    templateVariables: {},
   }
 
   try {
     const result = await generator.generateSetup(context)
-    
+
     if (result.conflicts && result.conflicts.length > 0) {
       console.log('⚠️  设置生成过程中发现以下冲突:')
       for (const conflict of result.conflicts) {

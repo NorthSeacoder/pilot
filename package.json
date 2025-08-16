@@ -1,104 +1,138 @@
 {
-    "name": "@nsea/pilot",
-    "version": "1.0.1",
-    "description": "🚀 可扩展的前端项目开发体验增强平台 - 智能检测项目技术栈，自动配置开发环境",
-    "keywords": [
-        "cli",
-        "frontend",
-        "development",
-        "testing",
-        "vitest",
-        "react",
-        "vue",
-        "automation",
-        "configuration"
-    ],
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.org/"
-    },
-    "packageManager": "pnpm@10.2.1",
-    "bin": {
-        "pilot": "bin/pilot.js"
-    },
-    "main": "dist/index.js",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
-        }
-    },
-    "homepage": "https://github.com/your-org/pilot#readme",
-    "bugs": {
-        "url": "https://github.com/your-org/pilot/issues"
-    },
-    "author": "NorthSeacoder",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/your-org/pilot.git"
-    },
-    "license": "MIT",
-    "files": [
-        "dist",
-        "bin",
-        "templates"
-    ],
-    "type": "module",
-    "devDependencies": {
-        "@antfu/ni": "^23.3.1",
-        "@arethetypeswrong/cli": "^0.15.4",
-        "@testing-library/jest-dom": "^6.6.4",
-        "@testing-library/react": "^16.3.0",
-        "@testing-library/user-event": "^14.6.1",
-        "@types/fs-extra": "^11.0.4",
-        "@types/inquirer": "^8.2.10",
-        "@types/js-yaml": "^4.0.9",
-        "@types/node": "^22.13.8",
-        "@vitest/ui": "^3.2.4",
-        "bumpp": "^10.0.3",
-        "commitizen": "^4.3.1",
-        "cz-conventional-changelog": "^3.3.0",
-        "esbuild-visualizer": "^0.7.0",
-        "jsdom": "^26.1.0",
-        "rimraf": "^6.0.1",
-        "tsup": "^8.2.4",
-        "tsx": "^4.20.0",
-        "typescript": "^5.5.4",
-        "vitest": "^2.1.9"
-    },
-    "scripts": {
-        "cz": "git add . && git-cz",
-        "clean": "rimraf dist stats.html",
-        "dev": "tsx src/cli/run.ts",
-        "start": "node bin/pilot.js",
-        "build": "nr clean && tsup",
-        "analyze": "nr clean && tsup --metafile && esbuild-visualizer --metadata ./dist/metafile-*.json --open",
-        "lint": "tsc",
-        "test": "vitest run",
-        "format": "prettier --write .",
-        "check-format": "prettier --check .",
-        "check-exports": "attw --pack .",
-        "typecheck": "tsc --noEmit",
-        "ci": "nr build && nr check-exports && nr lint && nr typecheck && nr test",
-        "prepublishOnly": "npm run ci",
-        "release": "pwd && bumpp && npm publish"
-    },
-    "dependencies": {
-        "boxen": "^7.1.1",
-        "chalk": "^4.1.2",
-        "commander": "^11.1.0",
-        "cosmiconfig": "^8.3.6",
-        "execa": "^7.2.0",
-        "find-up": "^6.3.0",
-        "fs-extra": "^11.2.0",
-        "glob": "^10.3.10",
-        "inquirer": "^9.2.12",
-        "js-yaml": "^4.1.0",
-        "ora": "^6.3.1"
-    },
-    "config": {
-        "commitizen": {
-            "path": "cz-conventional-changelog"
-        }
+  "name": "@nsea/pilot",
+  "version": "1.0.1",
+  "description": "🚀 可扩展的前端项目开发体验增强平台 - 智能检测项目技术栈，自动配置开发环境",
+  "keywords": [
+    "cli",
+    "frontend",
+    "development",
+    "testing",
+    "vitest",
+    "react",
+    "vue",
+    "automation",
+    "configuration"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "packageManager": "pnpm@10.2.1",
+  "bin": {
+    "pilot": "bin/pilot.js"
+  },
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
+  },
+  "homepage": "https://github.com/your-org/pilot#readme",
+  "bugs": {
+    "url": "https://github.com/your-org/pilot/issues"
+  },
+  "author": "NorthSeacoder",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/pilot.git"
+  },
+  "license": "MIT",
+  "files": [
+    "dist",
+    "bin",
+    "templates"
+  ],
+  "type": "module",
+  "devDependencies": {
+    "@antfu/ni": "^25.0.0",
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@eslint/js": "^9.15.0",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^8.2.10",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "bumpp": "^10.0.3",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "esbuild-visualizer": "^0.7.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "execa": "^9.5.2",
+    "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.5",
+    "mock-fs": "^5.4.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "simple-git-hooks": "^2.11.1",
+    "tsup": "^8.2.4",
+    "tsx": "^4.20.0",
+    "typescript": "^5.5.4",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "prepare": "simple-git-hooks",
+    "cz": "git add . && git-cz",
+    "clean": "rimraf dist stats.html",
+    "dev": "tsx src/cli/run.ts",
+    "dev:watch": "tsx watch src/cli/run.ts",
+    "start": "node bin/pilot.js",
+    "build": "nr clean && tsup",
+    "build:watch": "tsup --watch",
+    "analyze": "nr clean && tsup --metafile && esbuild-visualizer --metadata ./dist/metafile-*.json --open",
+    "lint": "eslint src --fix",
+    "lint:check": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run src",
+    "test:e2e": "vitest run test/e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check-exports": "attw --pack .",
+    "typecheck": "tsc --noEmit",
+    "ci": "nr lint:check && nr format:check && nr typecheck && nr test:coverage && nr build",
+    "prepublishOnly": "npm run ci",
+    "release": "bumpp && npm publish",
+    "postinstall": "simple-git-hooks"
+  },
+  "dependencies": {
+    "boxen": "^7.1.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "cosmiconfig": "^8.3.6",
+    "execa": "^7.2.0",
+    "find-up": "^6.3.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "inquirer": "^9.2.12",
+    "js-yaml": "^4.1.0",
+    "ora": "^6.3.1"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
 }

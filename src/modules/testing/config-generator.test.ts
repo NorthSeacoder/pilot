@@ -32,13 +32,13 @@ describe('VitestConfigGenerator', () => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -62,13 +62,13 @@ describe('VitestConfigGenerator', () => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: true },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -96,14 +96,14 @@ describe('VitestConfigGenerator', () => {
           type: 'pnpm',
           packages: [],
           rootPackageJson: {},
-          currentLocation: 'root'
-        }
+          currentLocation: 'root',
+        },
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -138,13 +138,13 @@ export default defineConfig({
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -180,13 +180,13 @@ export default defineConfig({
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -198,7 +198,7 @@ export default defineConfig({
 
     it('should handle workspace package execution context', async () => {
       const packagePath = join(tempDir, 'packages', 'app')
-      
+
       const projectInfo: ProjectDetection = {
         rootDir: tempDir,
         techStack: 'react',
@@ -220,15 +220,15 @@ export default defineConfig({
           currentPackage: {
             name: 'app',
             path: packagePath,
-            packageJson: {}
-          }
-        }
+            packageJson: {},
+          },
+        },
       }
 
       const context: ConfigContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateConfig(context)
@@ -299,14 +299,14 @@ describe('generateVitestConfig (legacy)', () => {
       dependencyVersions: {},
       existingConfigs: [],
       currentDir: tempDir,
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     await generateVitestConfig(projectInfo, { verbose: false })
 
     const configPath = join(tempDir, 'vitest.config.ts')
     const configContent = await readFile(configPath, 'utf-8')
-    
+
     expect(configContent).toContain("import react from '@vitejs/plugin-react'")
     expect(configContent).toContain('plugins: [react()]')
   })

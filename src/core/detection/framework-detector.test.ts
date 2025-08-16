@@ -2,67 +2,66 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { detectFramework } from './framework-detector'
 
 describe('Framework Detection', () => {
-
   describe('基于依赖的检测', () => {
     it('应该检测 React 项目', async () => {
       const packageJson = {
-        dependencies: { react: '^18.2.0' }
+        dependencies: { react: '^18.2.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('react')
     })
 
     it('应该检测 Vue 3 项目', async () => {
       const packageJson = {
-        dependencies: { vue: '^3.2.0' }
+        dependencies: { vue: '^3.2.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
 
     it('应该检测 Vue 2 项目', async () => {
       const packageJson = {
-        dependencies: { vue: '^2.6.0' }
+        dependencies: { vue: '^2.6.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue2')
     })
 
     it('应该通过开发依赖检测框架', async () => {
       const packageJson = {
-        devDependencies: { react: '^18.2.0' }
+        devDependencies: { react: '^18.2.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('react')
     })
 
     it('应该通过 Vue CLI 检测 Vue 3', async () => {
       const packageJson = {
-        devDependencies: { '@vue/cli-service': '^5.0.0' }
+        devDependencies: { '@vue/cli-service': '^5.0.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
 
     it('应该通过 Vite Vue 插件检测 Vue 3', async () => {
       const packageJson = {
-        devDependencies: { '@vitejs/plugin-vue': '^4.0.0' }
+        devDependencies: { '@vitejs/plugin-vue': '^4.0.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
 
     it('应该通过 Vue 2 相关包检测 Vue 2', async () => {
       const packageJson = {
-        devDependencies: { 'vue-template-compiler': '^2.6.0' }
+        devDependencies: { 'vue-template-compiler': '^2.6.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue2')
     })
@@ -77,36 +76,36 @@ describe('Framework Detection', () => {
   describe('版本解析', () => {
     it('应该正确解析带 ^ 前缀的 Vue 版本', async () => {
       const packageJson = {
-        dependencies: { vue: '^3.4.0' }
+        dependencies: { vue: '^3.4.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
 
     it('应该正确解析带 ~ 前缀的 Vue 版本', async () => {
       const packageJson = {
-        dependencies: { vue: '~2.7.0' }
+        dependencies: { vue: '~2.7.0' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue2')
     })
 
     it('应该正确解析包含数字的 Vue 版本', async () => {
       const packageJson = {
-        dependencies: { vue: '3.4.0-beta.1' }
+        dependencies: { vue: '3.4.0-beta.1' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
 
     it('当 Vue 版本不明确时应该默认返回 Vue 3', async () => {
       const packageJson = {
-        dependencies: { vue: 'latest' }
+        dependencies: { vue: 'latest' },
       }
-      
+
       const result = await detectFramework(packageJson)
       expect(result).toBe('vue3')
     })
@@ -115,10 +114,10 @@ describe('Framework Detection', () => {
   describe('Monorepo 环境检测', () => {
     // Mock 文件系统模块
     const mockPath = {
-      join: (...args: string[]) => args.join('/')
+      join: (...args: string[]) => args.join('/'),
     }
     const mockFs = {
-      readFile: vi.fn()
+      readFile: vi.fn(),
     }
 
     beforeEach(() => {
@@ -136,20 +135,20 @@ describe('Framework Detection', () => {
       // 子项目的 package.json（没有框架依赖）
       const childPackageJson = {
         name: 'child-project',
-        dependencies: {}
+        dependencies: {},
       }
 
       // 根目录的 package.json（有 Vue 2 依赖）
       const rootPackageJson = {
         name: 'monorepo-root',
-        dependencies: { vue: '^2.7.0' }
+        dependencies: { vue: '^2.7.0' },
       }
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(rootPackageJson))
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(childPackageJson, context)
@@ -159,18 +158,18 @@ describe('Framework Detection', () => {
 
     it('应该在子项目中检测根目录的 Vue 3 依赖', async () => {
       const childPackageJson = {
-        dependencies: {}
+        dependencies: {},
       }
 
       const rootPackageJson = {
-        dependencies: { vue: '^3.4.0' }
+        dependencies: { vue: '^3.4.0' },
       }
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(rootPackageJson))
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(childPackageJson, context)
@@ -180,18 +179,18 @@ describe('Framework Detection', () => {
     it('子项目依赖应该优先于根目录依赖', async () => {
       // 子项目有 React，根目录有 Vue
       const childPackageJson = {
-        dependencies: { react: '^18.2.0' }
+        dependencies: { react: '^18.2.0' },
       }
 
       const rootPackageJson = {
-        dependencies: { vue: '^3.4.0' }
+        dependencies: { vue: '^3.4.0' },
       }
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(rootPackageJson))
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(childPackageJson, context)
@@ -200,14 +199,14 @@ describe('Framework Detection', () => {
 
     it('当根目录 package.json 读取失败时应该降级到原有逻辑', async () => {
       const childPackageJson = {
-        dependencies: {}
+        dependencies: {},
       }
 
       mockFs.readFile.mockRejectedValue(new Error('File not found'))
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(childPackageJson, context)
@@ -216,12 +215,12 @@ describe('Framework Detection', () => {
 
     it('在单模块项目中应该使用原有逻辑', async () => {
       const packageJson = {
-        dependencies: { vue: '^2.7.0' }
+        dependencies: { vue: '^2.7.0' },
       }
 
       const context = {
         currentDir: '/test/project',
-        rootDir: '/test/project' // 相同目录，不是 monorepo
+        rootDir: '/test/project', // 相同目录，不是 monorepo
       }
 
       const result = await detectFramework(packageJson, context)
@@ -231,18 +230,18 @@ describe('Framework Detection', () => {
 
     it('应该检测 Vue 相关的构建工具', async () => {
       const childPackageJson = {
-        dependencies: {}
+        dependencies: {},
       }
 
       const rootPackageJson = {
-        devDependencies: { '@vue/cli-service': '^5.0.0' }
+        devDependencies: { '@vue/cli-service': '^5.0.0' },
       }
 
       mockFs.readFile.mockResolvedValue(JSON.stringify(rootPackageJson))
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(childPackageJson, context)
@@ -254,12 +253,12 @@ describe('Framework Detection', () => {
     // Mock fs-extra 模块
     const mockFsExtra = {
       pathExists: vi.fn(),
-      readFile: vi.fn()
+      readFile: vi.fn(),
     }
 
     // Mock node:fs/promises 模块
     const mockFsPromises = {
-      readFile: vi.fn()
+      readFile: vi.fn(),
     }
 
     beforeEach(() => {
@@ -276,7 +275,7 @@ describe('Framework Detection', () => {
     it('应该检测 node_modules 中实际安装的 Vue 2', async () => {
       // package.json 中没有任何框架依赖
       const packageJson = {
-        dependencies: {}
+        dependencies: {},
       }
 
       // 模拟根目录 package.json 也没有框架依赖
@@ -287,14 +286,16 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('node_modules/vue/package.json'))
       })
 
-      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
-        name: 'vue',
-        version: '2.7.14'
-      }))
+      mockFsPromises.readFile.mockResolvedValue(
+        JSON.stringify({
+          name: 'vue',
+          version: '2.7.14',
+        })
+      )
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -311,14 +312,16 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('node_modules/vue/package.json'))
       })
 
-      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
-        name: 'vue',
-        version: '3.4.0'
-      }))
+      mockFsPromises.readFile.mockResolvedValue(
+        JSON.stringify({
+          name: 'vue',
+          version: '3.4.0',
+        })
+      )
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -334,7 +337,7 @@ describe('Framework Detection', () => {
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -350,7 +353,7 @@ describe('Framework Detection', () => {
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -383,7 +386,7 @@ describe('Framework Detection', () => {
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -398,7 +401,7 @@ describe('Framework Detection', () => {
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -413,14 +416,16 @@ describe('Framework Detection', () => {
         return Promise.resolve(filePath.includes('/test/node_modules/vue/package.json'))
       })
 
-      mockFsPromises.readFile.mockResolvedValue(JSON.stringify({
-        name: 'vue',
-        version: '2.7.14'
-      }))
+      mockFsPromises.readFile.mockResolvedValue(
+        JSON.stringify({
+          name: 'vue',
+          version: '2.7.14',
+        })
+      )
 
       const context = {
         currentDir: '/test/monorepo/packages/child',
-        rootDir: '/test/monorepo'
+        rootDir: '/test/monorepo',
       }
 
       const result = await detectFramework(packageJson, context)
@@ -431,20 +436,20 @@ describe('Framework Detection', () => {
   describe('代码内容分析检测', () => {
     let mockFsExtra: any
     let mockFsPromises: any
-    
+
     beforeEach(() => {
       // Reset all mocks
       vi.clearAllMocks()
-      
+
       mockFsExtra = {
         pathExists: vi.fn(),
-        readFile: vi.fn()
+        readFile: vi.fn(),
       }
-      
+
       mockFsPromises = {
-        readFile: vi.fn()
+        readFile: vi.fn(),
       }
-      
+
       vi.doMock('fs-extra', () => mockFsExtra)
       vi.doMock('node:fs/promises', () => mockFsPromises)
     })
@@ -461,17 +466,20 @@ import App from './App.vue'
 
 createApp(App).mount('#app')
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/main.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(mainJs)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('vue3')
     })
 
@@ -484,17 +492,20 @@ new Vue({
   render: h => h(App),
 }).$mount('#app')
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/main.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(mainJs)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('vue2')
     })
 
@@ -507,19 +518,22 @@ new Vue({
       lines.push('new Vue({')
       lines.push('  render: h => h(App)')
       lines.push('}).$mount("#app")')
-      
+
       const mainJs = lines.join('\n')
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/main.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(mainJs)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('vue2')
     })
 
@@ -531,17 +545,20 @@ import App from './App'
 
 ReactDOM.render(<App />, document.getElementById('root'))
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/index.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(indexJs)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('react')
     })
 
@@ -554,17 +571,20 @@ import App from './App'
 const root = createRoot(document.getElementById('root'))
 root.render(<App />)
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/index.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(indexJs)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('react')
     })
 
@@ -579,17 +599,20 @@ import { ref } from 'vue'
 const count = ref(0)
 </script>
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/App.vue'))
       )
       mockFsPromises.readFile.mockResolvedValue(appVue)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('vue3')
     })
 
@@ -610,17 +633,20 @@ export default {
 }
 </script>
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/App.vue'))
       )
       mockFsPromises.readFile.mockResolvedValue(appVue)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('vue2')
     })
 
@@ -643,28 +669,34 @@ function App() {
 
 export default App
 `
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/App.jsx'))
       )
       mockFsPromises.readFile.mockResolvedValue(appJsx)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('react')
     })
 
     it('代码分析失败时应该返回默认值', async () => {
       mockFsExtra.pathExists.mockResolvedValue(false)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('react')
     })
 
@@ -672,28 +704,34 @@ export default App
       mockFsExtra.pathExists.mockResolvedValue(true)
       mockFsPromises.readFile.mockRejectedValue(new Error('File read error'))
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       expect(result).toBe('react')
     })
 
     it('应该限制大文件读取大小', async () => {
       // 创建一个超过 500KB 的文件内容
       const largeContent = 'a'.repeat(600 * 1024) + '\nnew Vue({})'
-      
-      mockFsExtra.pathExists.mockImplementation((path: string) => 
+
+      mockFsExtra.pathExists.mockImplementation((path: string) =>
         Promise.resolve(path.includes('src/main.js'))
       )
       mockFsPromises.readFile.mockResolvedValue(largeContent)
 
-      const result = await detectFramework({}, { 
-        currentDir: '/test/project', 
-        rootDir: '/test' 
-      })
-      
+      const result = await detectFramework(
+        {},
+        {
+          currentDir: '/test/project',
+          rootDir: '/test',
+        }
+      )
+
       // 因为截断了文件，new Vue 在截断后的部分，所以检测不到
       expect(result).toBe('react')
     })

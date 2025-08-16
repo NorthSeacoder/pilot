@@ -40,7 +40,7 @@ pilot add testing
 
 # 分步配置
 pilot add testing --rules      # 仅添加 AI 测试规则
-pilot add testing --config     # 仅添加 Vitest 配置  
+pilot add testing --config     # 仅添加 Vitest 配置
 pilot add testing --deps       # 仅安装测试依赖
 ```
 
@@ -60,11 +60,13 @@ pilot add testing --stack vue3 --arch pnpm
 ## 📋 支持的项目类型
 
 ### 技术栈支持
+
 - **React**: Create React App, Vite, Next.js
-- **Vue3**: Vite, Vue CLI, Nuxt3  
+- **Vue3**: Vite, Vue CLI, Nuxt3
 - **Vue2**: Vue CLI, 自定义 Webpack 配置
 
 ### 项目架构支持
+
 - **单模块项目**: 标准的单个 package.json 项目结构
 - **pnpm workspace**: 通过 `pnpm-workspace.yaml` 检测和配置
 - **Yarn workspace**: 通过 `package.json` 的 workspaces 字段检测和配置
@@ -72,6 +74,7 @@ pilot add testing --stack vue3 --arch pnpm
 ## 🛠️ 开发指南
 
 ### 项目结构
+
 ```
 src/
 ├── cli/                  # CLI 入口和命令解析
@@ -88,6 +91,7 @@ src/
 ```
 
 ### 本地开发
+
 ```bash
 # 克隆项目
 git clone https://github.com/your-org/pilot
@@ -109,6 +113,7 @@ pnpm test
 ## 🎯 当前功能
 
 ### V1.0 MVP - Testing 模块
+
 - ✅ 项目技术栈自动检测（React/Vue2/Vue3）
 - ✅ 项目架构检测（单模块/pnpm workspace/yarn workspace）
 - ✅ AI 测试规则文件生成（.cursorrules）
@@ -117,6 +122,7 @@ pnpm test
 - ✅ 配置文件验证和测试
 
 ### 🚧 规划中功能
+
 - **Linting 模块**: ESLint + 企业规则
 - **Formatting 模块**: Prettier + 统一配置
 - **Git Hooks 模块**: Husky + lint-staged
@@ -124,12 +130,14 @@ pnpm test
 ## 🧪 示例用法
 
 添加测试配置到 React 项目：
+
 ```bash
 cd my-react-app
 pilot add testing
 ```
 
 输出示例：
+
 ```
 🚀 Pilot
 前端项目开发体验增强平台

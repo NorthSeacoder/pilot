@@ -29,7 +29,7 @@ describe('generateCursorRules', () => {
       dependencyVersions: {},
       existingConfigs: [],
       currentDir: tempDir,
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     await generateCursorRules(projectInfo, { verbose: false })
@@ -43,7 +43,7 @@ describe('generateCursorRules', () => {
     expect(content).toContain('# 1. 分析阶段')
     expect(content).toContain('# 2. 测试设计阶段')
     expect(content).toContain('Testing strategy and requirements for projects')
-    
+
     // Should not contain any unresolved variables
     expect(content).not.toContain('{{')
   })
@@ -61,7 +61,7 @@ describe('generateCursorRules', () => {
       dependencyVersions: {},
       existingConfigs: [],
       currentDir: tempDir,
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     await generateCursorRules(projectInfo, { verbose: true })

@@ -1,12 +1,12 @@
 import path from 'node:path'
 import { readFile, writeFile, copyFile } from 'fs/promises'
 import { pathExists } from 'fs-extra'
-import type { 
+import type {
   ProjectDetection,
   ConfigConflict,
   ConflictResolutionOptions,
   ConflictResolutionResult,
-  ConflictDetectionContext
+  ConflictDetectionContext,
 } from '../../types'
 
 /**
@@ -62,7 +62,11 @@ export class ConfigConflictResolver {
 
       // 检测 Vitest 配置冲突
       if (fileName.includes('vitest.config')) {
-        const vitestConflicts = this.detectVitestConfigConflicts(filePath, existingContent, newConfig)
+        const vitestConflicts = this.detectVitestConfigConflicts(
+          filePath,
+          existingContent,
+          newConfig
+        )
         conflicts.push(...vitestConflicts)
       }
 
@@ -74,10 +78,14 @@ export class ConfigConflictResolver {
 
       // 检测 package.json 冲突
       if (fileName === 'package.json') {
-        const packageConflicts = this.detectPackageJsonConflicts(filePath, existingContent, newConfig, projectInfo)
+        const packageConflicts = this.detectPackageJsonConflicts(
+          filePath,
+          existingContent,
+          newConfig,
+          projectInfo
+        )
         conflicts.push(...packageConflicts)
       }
-
     } catch (error) {
       conflicts.push({
         id: `file-read-error-${path.basename(filePath)}`,
@@ -88,7 +96,7 @@ export class ConfigConflictResolver {
         existingValue: null,
         newValue: newConfigs[path.basename(filePath)],
         suggestedStrategy: 'manual',
-        availableStrategies: ['manual', 'skip']
+        availableStrategies: ['manual', 'skip'],
       })
     }
 
@@ -116,12 +124,12 @@ export class ConfigConflictResolver {
         existingValue: '现有 Vitest 配置',
         newValue: newConfig,
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'replace', 'backup', 'skip']
+        availableStrategies: ['merge', 'replace', 'backup', 'skip'],
       })
     }
 
     // 检测环境配置冲突
-    if (existingContent.includes("environment:") && newConfig.test?.environment) {
+    if (existingContent.includes('environment:') && newConfig.test?.environment) {
       const existingEnv = this.extractConfigValue(existingContent, 'environment')
       if (existingEnv && existingEnv !== newConfig.test.environment) {
         conflicts.push({
@@ -133,7 +141,7 @@ export class ConfigConflictResolver {
           existingValue: existingEnv,
           newValue: newConfig.test.environment,
           suggestedStrategy: 'merge',
-          availableStrategies: ['merge', 'replace', 'manual']
+          availableStrategies: ['merge', 'replace', 'manual'],
         })
       }
     }
@@ -149,7 +157,7 @@ export class ConfigConflictResolver {
         existingValue: '现有插件配置',
         newValue: newConfig.plugins,
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'replace']
+        availableStrategies: ['merge', 'replace'],
       })
     }
 
@@ -177,7 +185,7 @@ export class ConfigConflictResolver {
         existingValue: '现有测试库设置',
         newValue: newConfig,
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'replace', 'backup', 'skip']
+        availableStrategies: ['merge', 'replace', 'backup', 'skip'],
       })
     }
 
@@ -192,7 +200,7 @@ export class ConfigConflictResolver {
         existingValue: '现有清理设置',
         newValue: newConfig,
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'skip']
+        availableStrategies: ['merge', 'skip'],
       })
     }
 
@@ -207,7 +215,7 @@ export class ConfigConflictResolver {
         existingValue: '现有 Mock 设置',
         newValue: newConfig,
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'skip']
+        availableStrategies: ['merge', 'skip'],
       })
     }
 
@@ -227,11 +235,14 @@ export class ConfigConflictResolver {
 
     try {
       const existingPackage = JSON.parse(existingContent)
-      
+
       // 检测脚本冲突
       if (existingPackage.scripts && newConfig.scripts) {
         for (const [scriptName, scriptValue] of Object.entries(newConfig.scripts)) {
-          if (existingPackage.scripts[scriptName] && existingPackage.scripts[scriptName] !== scriptValue) {
+          if (
+            existingPackage.scripts[scriptName] &&
+            existingPackage.scripts[scriptName] !== scriptValue
+          ) {
             conflicts.push({
               id: `script-conflict-${scriptName}`,
               type: 'config-exists',
@@ -241,7 +252,7 @@ export class ConfigConflictResolver {
               existingValue: existingPackage.scripts[scriptName],
               newValue: scriptValue,
               suggestedStrategy: 'merge',
-              availableStrategies: ['merge', 'replace', 'skip']
+              availableStrategies: ['merge', 'replace', 'skip'],
             })
           }
         }
@@ -262,13 +273,12 @@ export class ConfigConflictResolver {
                 existingValue: existingVersion,
                 newValue: depVersion,
                 suggestedStrategy: 'merge',
-                availableStrategies: ['merge', 'replace', 'skip']
+                availableStrategies: ['merge', 'replace', 'skip'],
               })
             }
           }
         }
       }
-
     } catch (error) {
       conflicts.push({
         id: 'package-json-parse-error',
@@ -279,7 +289,7 @@ export class ConfigConflictResolver {
         existingValue: existingContent,
         newValue: newConfig,
         suggestedStrategy: 'manual',
-        availableStrategies: ['manual', 'skip']
+        availableStrategies: ['manual', 'skip'],
       })
     }
 
@@ -299,7 +309,11 @@ export class ConfigConflictResolver {
     // 检测框架版本兼容性
     const frameworkVersion = this.getFrameworkVersion(dependencyVersions, techStack)
     if (frameworkVersion) {
-      const incompatibleDeps = this.checkVersionCompatibility(frameworkVersion, techStack, newConfigs)
+      const incompatibleDeps = this.checkVersionCompatibility(
+        frameworkVersion,
+        techStack,
+        newConfigs
+      )
       conflicts.push(...incompatibleDeps)
     }
 
@@ -329,7 +343,7 @@ export class ConfigConflictResolver {
           existingValue: reactVersion,
           newValue: '推荐版本 ^17.0.0 或 ^18.0.0',
           suggestedStrategy: 'manual',
-          availableStrategies: ['manual', 'skip']
+          availableStrategies: ['manual', 'skip'],
         })
       }
     }
@@ -347,7 +361,7 @@ export class ConfigConflictResolver {
           existingValue: vueVersion,
           newValue: techStack === 'vue2' ? '推荐版本 ^2.6.0' : '推荐版本 ^3.0.0',
           suggestedStrategy: 'manual',
-          availableStrategies: ['manual', 'skip']
+          availableStrategies: ['manual', 'skip'],
         })
       }
     }
@@ -368,7 +382,7 @@ export class ConfigConflictResolver {
       strategy,
       filePath: conflict.filePath,
       changes: [],
-      errors: []
+      errors: [],
     }
 
     try {
@@ -405,7 +419,7 @@ export class ConfigConflictResolver {
       strategy: 'merge',
       filePath: conflict.filePath,
       changes: [],
-      errors: []
+      errors: [],
     }
 
     try {
@@ -435,7 +449,6 @@ export class ConfigConflictResolver {
       await writeFile(conflict.filePath, mergedContent, 'utf-8')
       result.resolved = true
       result.changes.push('配置已成功合并')
-
     } catch (error) {
       result.errors.push(`合并配置失败: ${error}`)
     }
@@ -455,7 +468,7 @@ export class ConfigConflictResolver {
       strategy: 'replace',
       filePath: conflict.filePath,
       changes: [],
-      errors: []
+      errors: [],
     }
 
     try {
@@ -468,14 +481,14 @@ export class ConfigConflictResolver {
       }
 
       // 写入新配置
-      const newContent = typeof conflict.newValue === 'string' 
-        ? conflict.newValue 
-        : JSON.stringify(conflict.newValue, null, 2)
-      
+      const newContent =
+        typeof conflict.newValue === 'string'
+          ? conflict.newValue
+          : JSON.stringify(conflict.newValue, null, 2)
+
       await writeFile(conflict.filePath, newContent, 'utf-8')
       result.resolved = true
       result.changes.push('配置已完全替换')
-
     } catch (error) {
       result.errors.push(`替换配置失败: ${error}`)
     }
@@ -503,7 +516,7 @@ export class ConfigConflictResolver {
       strategy: 'skip',
       filePath: conflict.filePath,
       changes: ['配置已跳过，保持现有设置'],
-      errors: []
+      errors: [],
     }
   }
 
@@ -519,7 +532,7 @@ export class ConfigConflictResolver {
       strategy: 'manual',
       filePath: conflict.filePath,
       changes: ['需要手动解决冲突'],
-      errors: ['此冲突需要手动处理']
+      errors: ['此冲突需要手动处理'],
     }
   }
 
@@ -544,7 +557,7 @@ export class ConfigConflictResolver {
         }
       )
     }
-    
+
     return existingContent
   }
 
@@ -560,7 +573,7 @@ export class ConfigConflictResolver {
     let mergedContent = existingContent
 
     // 添加缺失的导入
-    if (!existingContent.includes("@testing-library/jest-dom")) {
+    if (!existingContent.includes('@testing-library/jest-dom')) {
       mergedContent = "import '@testing-library/jest-dom'\n" + mergedContent
     }
 
@@ -576,7 +589,7 @@ export class ConfigConflictResolver {
     _options: ConflictResolutionOptions
   ): Promise<string> {
     const existingPackage = JSON.parse(existingContent)
-    
+
     // 合并脚本
     if (newConfig.scripts) {
       existingPackage.scripts = { ...existingPackage.scripts, ...newConfig.scripts }
@@ -584,7 +597,10 @@ export class ConfigConflictResolver {
 
     // 合并依赖
     if (newConfig.devDependencies) {
-      existingPackage.devDependencies = { ...existingPackage.devDependencies, ...newConfig.devDependencies }
+      existingPackage.devDependencies = {
+        ...existingPackage.devDependencies,
+        ...newConfig.devDependencies,
+      }
     }
 
     return JSON.stringify(existingPackage, null, 2)
@@ -609,7 +625,10 @@ export class ConfigConflictResolver {
   /**
    * 获取框架版本
    */
-  private getFrameworkVersion(dependencies: Record<string, string>, techStack: string): string | null {
+  private getFrameworkVersion(
+    dependencies: Record<string, string>,
+    techStack: string
+  ): string | null {
     switch (techStack) {
       case 'react':
         return dependencies.react || null
@@ -698,7 +717,7 @@ export async function interactiveConflictResolution(
     const options: ConflictResolutionOptions = {
       strategy: conflict.suggestedStrategy,
       backupOriginal: true,
-      preserveComments: true
+      preserveComments: true,
     }
 
     const result = await resolver.resolveConflict(conflict, options)

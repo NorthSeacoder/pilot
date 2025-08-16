@@ -1,4 +1,3 @@
-
 import type { ProjectDetection, ModuleOptions } from '../../types'
 import { RulesInstaller } from './rules-installer'
 
@@ -10,10 +9,10 @@ export async function generateCursorRules(
   _options: ModuleOptions
 ): Promise<void> {
   const { rootDir } = projectInfo
-  
+
   // 使用简单的规则安装器
   const installer = new RulesInstaller()
-  
+
   try {
     // 直接复制通用规则文件
     await installer.installTestingStrategy(rootDir)

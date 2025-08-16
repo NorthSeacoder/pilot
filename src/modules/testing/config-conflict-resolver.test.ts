@@ -2,14 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdtemp, rm, readFile, writeFile, mkdir } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { 
-  ConfigConflictResolver, 
-  resolveConflicts
-} from './config-conflict-resolver'
-import type { 
+import { ConfigConflictResolver, resolveConflicts } from './config-conflict-resolver'
+import type {
   ConfigConflict,
   ConflictDetectionContext,
-  ConflictResolutionOptions
+  ConflictResolutionOptions,
 } from '../../types'
 import type { ProjectDetection } from '../../types'
 
@@ -53,7 +50,7 @@ export default defineConfig({
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
@@ -64,17 +61,17 @@ export default defineConfig({
           'vitest.config.ts': {
             test: {
               environment: 'jsdom',
-              globals: true
-            }
-          }
-        }
+              globals: true,
+            },
+          },
+        },
       }
 
       const conflicts = await resolver.detectConflicts(context)
 
       expect(conflicts.length).toBeGreaterThan(0)
-      expect(conflicts.some(c => c.type === 'config-exists')).toBe(true)
-      expect(conflicts.some(c => c.id === 'vitest-config-exists')).toBe(true)
+      expect(conflicts.some((c) => c.type === 'config-exists')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'vitest-config-exists')).toBe(true)
     })
 
     it('should detect test setup conflicts', async () => {
@@ -102,7 +99,7 @@ afterEach(() => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
@@ -110,15 +107,15 @@ afterEach(() => {
         options: { verbose: false },
         targetFiles: [setupPath],
         newConfigs: {
-          'test-setup.ts': 'new setup content'
-        }
+          'test-setup.ts': 'new setup content',
+        },
       }
 
       const conflicts = await resolver.detectConflicts(context)
 
       expect(conflicts.length).toBeGreaterThan(0)
-      expect(conflicts.some(c => c.type === 'setup-conflict')).toBe(true)
-      expect(conflicts.some(c => c.id === 'testing-library-exists')).toBe(true)
+      expect(conflicts.some((c) => c.type === 'setup-conflict')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'testing-library-exists')).toBe(true)
     })
 
     it('should detect package.json conflicts', async () => {
@@ -126,12 +123,12 @@ afterEach(() => {
         name: 'test-project',
         scripts: {
           test: 'jest',
-          build: 'webpack'
+          build: 'webpack',
         },
         devDependencies: {
           jest: '^28.0.0',
-          webpack: '^5.0.0'
-        }
+          webpack: '^5.0.0',
+        },
       }
 
       const packagePath = join(tempDir, 'package.json')
@@ -149,7 +146,7 @@ afterEach(() => {
         dependencyVersions: existingPackage.devDependencies,
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
@@ -160,21 +157,21 @@ afterEach(() => {
           'package.json': {
             scripts: {
               test: 'vitest',
-              'test:ui': 'vitest --ui'
+              'test:ui': 'vitest --ui',
             },
             devDependencies: {
               vitest: '^1.0.0',
-              jest: '^29.0.0'
-            }
-          }
-        }
+              jest: '^29.0.0',
+            },
+          },
+        },
       }
 
       const conflicts = await resolver.detectConflicts(context)
 
       expect(conflicts.length).toBeGreaterThan(0)
-      expect(conflicts.some(c => c.id === 'script-conflict-test')).toBe(true)
-      expect(conflicts.some(c => c.id === 'dependency-conflict-jest')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'script-conflict-test')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'dependency-conflict-jest')).toBe(true)
     })
 
     it('should detect framework version incompatibility', async () => {
@@ -188,24 +185,24 @@ afterEach(() => {
         hasExistingTests: false,
         existingTestFrameworks: [],
         dependencyVersions: {
-          react: '^15.0.0' // Incompatible version
+          react: '^15.0.0', // Incompatible version
         },
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
         projectInfo,
         options: { verbose: false },
         targetFiles: [],
-        newConfigs: {}
+        newConfigs: {},
       }
 
       const conflicts = await resolver.detectConflicts(context)
 
-      expect(conflicts.some(c => c.type === 'version-incompatible')).toBe(true)
-      expect(conflicts.some(c => c.id === 'react-version-incompatible')).toBe(true)
+      expect(conflicts.some((c) => c.type === 'version-incompatible')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'react-version-incompatible')).toBe(true)
     })
   })
 
@@ -234,17 +231,17 @@ export default defineConfig({
         newValue: {
           test: {
             environment: 'jsdom',
-            globals: true
-          }
+            globals: true,
+          },
         },
         suggestedStrategy: 'merge',
-        availableStrategies: ['merge', 'replace', 'backup']
+        availableStrategies: ['merge', 'replace', 'backup'],
       }
 
       const options: ConflictResolutionOptions = {
         strategy: 'merge',
         backupOriginal: true,
-        preserveComments: true
+        preserveComments: true,
       }
 
       const result = await resolver.resolveConflict(conflict, options)
@@ -272,13 +269,13 @@ export default defineConfig({
         existingValue: existingConfig,
         newValue: 'export default { new: "config" }',
         suggestedStrategy: 'replace',
-        availableStrategies: ['replace', 'backup']
+        availableStrategies: ['replace', 'backup'],
       }
 
       const options: ConflictResolutionOptions = {
         strategy: 'replace',
         backupOriginal: true,
-        preserveComments: true
+        preserveComments: true,
       }
 
       const result = await resolver.resolveConflict(conflict, options)
@@ -305,13 +302,13 @@ export default defineConfig({
         existingValue: existingConfig,
         newValue: 'new config',
         suggestedStrategy: 'skip',
-        availableStrategies: ['skip', 'merge']
+        availableStrategies: ['skip', 'merge'],
       }
 
       const options: ConflictResolutionOptions = {
         strategy: 'skip',
         backupOriginal: false,
-        preserveComments: true
+        preserveComments: true,
       }
 
       const result = await resolver.resolveConflict(conflict, options)
@@ -333,13 +330,13 @@ export default defineConfig({
         existingValue: 'old value',
         newValue: 'new value',
         suggestedStrategy: 'manual',
-        availableStrategies: ['manual']
+        availableStrategies: ['manual'],
       }
 
       const options: ConflictResolutionOptions = {
         strategy: 'manual',
         backupOriginal: false,
-        preserveComments: true
+        preserveComments: true,
       }
 
       const result = await resolver.resolveConflict(conflict, options)
@@ -362,7 +359,7 @@ export default defineConfig({
           existingValue: 'old1',
           newValue: 'new1',
           suggestedStrategy: 'skip',
-          availableStrategies: ['skip']
+          availableStrategies: ['skip'],
         },
         {
           id: 'conflict-2',
@@ -373,28 +370,28 @@ export default defineConfig({
           existingValue: 'old2',
           newValue: 'new2',
           suggestedStrategy: 'skip',
-          availableStrategies: ['skip']
-        }
+          availableStrategies: ['skip'],
+        },
       ]
 
       const options: ConflictResolutionOptions = {
         strategy: 'skip',
         backupOriginal: false,
-        preserveComments: true
+        preserveComments: true,
       }
 
       const results = await resolveConflicts(conflicts, options)
 
       expect(results).toHaveLength(2)
-      expect(results.every(r => r.resolved)).toBe(true)
-      expect(results.every(r => r.strategy === 'skip')).toBe(true)
+      expect(results.every((r) => r.resolved)).toBe(true)
+      expect(results.every((r) => r.strategy === 'skip')).toBe(true)
     })
   })
 
   describe('error handling', () => {
     it('should handle file read errors', async () => {
       const nonExistentPath = join(tempDir, 'nonexistent.ts')
-      
+
       const projectInfo: ProjectDetection = {
         rootDir: tempDir,
         techStack: 'react',
@@ -407,7 +404,7 @@ export default defineConfig({
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
@@ -415,8 +412,8 @@ export default defineConfig({
         options: { verbose: false },
         targetFiles: [nonExistentPath],
         newConfigs: {
-          'nonexistent.ts': 'new config'
-        }
+          'nonexistent.ts': 'new config',
+        },
       }
 
       const conflicts = await resolver.detectConflicts(context)
@@ -442,7 +439,7 @@ export default defineConfig({
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: ConflictDetectionContext = {
@@ -450,14 +447,14 @@ export default defineConfig({
         options: { verbose: false },
         targetFiles: [packagePath],
         newConfigs: {
-          'package.json': { scripts: { test: 'vitest' } }
-        }
+          'package.json': { scripts: { test: 'vitest' } },
+        },
       }
 
       const conflicts = await resolver.detectConflicts(context)
 
-      expect(conflicts.some(c => c.id === 'package-json-parse-error')).toBe(true)
-      expect(conflicts.some(c => c.severity === 'error')).toBe(true)
+      expect(conflicts.some((c) => c.id === 'package-json-parse-error')).toBe(true)
+      expect(conflicts.some((c) => c.severity === 'error')).toBe(true)
     })
   })
 })

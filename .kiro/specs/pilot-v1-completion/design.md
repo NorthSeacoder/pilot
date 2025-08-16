@@ -16,11 +16,11 @@ graph TB
     Parser --> Manager[模块管理器]
     Manager --> Detector[项目检测器]
     Manager --> Module[功能模块]
-    
+
     Detector --> Framework[框架检测]
     Detector --> Architecture[架构检测]
     Detector --> PackageManager[包管理器检测]
-    
+
     Module --> Testing[测试模块]
     Testing --> ConfigGen[配置生成器]
     Testing --> RulesGen[规则生成器]
@@ -54,6 +54,7 @@ interface CLIOption {
 ```
 
 **设计要点：**
+
 - 保持现有 `add` 命令结构不变
 - 预留扩展接口支持未来的 `remove`、`update`、`list`、`status` 命令
 - 增强 `--help` 输出，提供详细的使用文档
@@ -83,6 +84,7 @@ interface WorkspacePackage {
 ```
 
 **检测策略增强：**
+
 - **版本兼容性检测：** 分析现有依赖版本，选择兼容的测试工具版本
 - **冲突检测：** 识别现有测试配置和依赖冲突
 - **工作区深度分析：** 对 monorepo 项目进行包级别的详细分析
@@ -112,11 +114,12 @@ enum TemplateType {
   VITEST_CONFIG = 'vitest-config',
   TEST_SETUP = 'test-setup',
   TESTING_STRATEGY = 'testing-strategy',
-  PACKAGE_JSON_SCRIPTS = 'package-scripts'
+  PACKAGE_JSON_SCRIPTS = 'package-scripts',
 }
 ```
 
 **模板文件组织：**
+
 ```
 src/modules/testing/templates/
 ├── vitest-config/
@@ -177,6 +180,7 @@ interface CompatibilityMatrix {
 ```
 
 **依赖策略：**
+
 - **版本兼容性矩阵：** 维护框架版本与测试工具版本的兼容性映射
 - **智能版本选择：** 根据项目现有依赖自动选择最佳版本
 - **冲突解决：** 提供多种冲突解决策略供用户选择
@@ -257,7 +261,7 @@ enum ErrorCode {
   DEPENDENCY_INSTALL_FAILED = 'DEPENDENCY_INSTALL_FAILED',
   CONFIG_GENERATION_FAILED = 'CONFIG_GENERATION_FAILED',
   FILE_SYSTEM_ERROR = 'FILE_SYSTEM_ERROR',
-  NETWORK_ERROR = 'NETWORK_ERROR'
+  NETWORK_ERROR = 'NETWORK_ERROR',
 }
 ```
 
@@ -270,20 +274,20 @@ interface ProjectInfo {
   // 基础信息
   rootDir: string
   packageJson: any
-  
+
   // 技术栈信息
   techStack: TechStack
   architecture: ProjectArchitecture
   packageManager: PackageManager
-  
+
   // 环境信息
   isTypeScript: boolean
   nodeVersion: string
-  
+
   // 现有配置
   existingConfigs: ExistingConfig[]
   existingDependencies: Record<string, string>
-  
+
   // 工作区信息（如果适用）
   workspaceInfo?: WorkspaceInfo
 }

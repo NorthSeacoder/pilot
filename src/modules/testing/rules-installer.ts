@@ -41,7 +41,7 @@ export class RulesInstaller {
 
       // Copy the rules file
       await copyFile(sourceFile, targetFile)
-      
+
       console.log(`✅ Testing strategy rules installed to: ${targetFile}`)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)

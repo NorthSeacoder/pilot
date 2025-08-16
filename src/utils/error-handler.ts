@@ -26,11 +26,7 @@ export async function safeAsync<T>(
 /**
  * 安全执行同步操作，统一错误处理
  */
-export function safeSync<T>(
-  operation: () => T,
-  context: ErrorContext,
-  fallback: T
-): T {
+export function safeSync<T>(operation: () => T, context: ErrorContext, fallback: T): T {
   try {
     return operation()
   } catch (error) {
@@ -63,10 +59,7 @@ export async function safeReadFile(
 /**
  * 安全的 JSON 解析操作
  */
-export function safeParseJSON<T = any>(
-  content: string,
-  context: ErrorContext
-): T | null {
+export function safeParseJSON<T = any>(content: string, context: ErrorContext): T | null {
   return safeSync(
     () => JSON.parse(content),
     { ...context, operation: `${context.operation} - JSON解析` },
@@ -85,8 +78,6 @@ export async function safeBatch<T>(
   }>
 ): Promise<T[]> {
   return Promise.all(
-    operations.map(({ operation, context, fallback }) =>
-      safeAsync(operation, context, fallback)
-    )
+    operations.map(({ operation, context, fallback }) => safeAsync(operation, context, fallback))
   )
 }

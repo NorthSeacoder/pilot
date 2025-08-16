@@ -5,14 +5,14 @@ import type { ProjectDetection, ModuleOptions } from '../../types'
 
 // Mock execa
 vi.mock('execa', () => ({
-  execa: vi.fn()
+  execa: vi.fn(),
 }))
 
 // Mock fs promises
 vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
   writeFile: vi.fn(),
-  unlink: vi.fn()
+  unlink: vi.fn(),
 }))
 
 const mockExeca = vi.mocked(await import('execa')).execa
@@ -25,7 +25,7 @@ describe('dependency-installer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     mockProjectInfo = {
       techStack: 'react',
       architecture: 'single',
@@ -37,20 +37,20 @@ describe('dependency-installer', () => {
       existingTestFrameworks: [],
       dependencyVersions: {
         react: '^18.2.0',
-        'react-dom': '^18.2.0'
+        'react-dom': '^18.2.0',
       },
       existingConfigs: [],
       currentDir: '/test/project',
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     mockPackageJson = {
       name: 'test-project',
       dependencies: {
         react: '^18.2.0',
-        'react-dom': '^18.2.0'
+        'react-dom': '^18.2.0',
       },
-      devDependencies: {}
+      devDependencies: {},
     }
 
     mockReadFile.mockResolvedValue(JSON.stringify(mockPackageJson, null, 2))
@@ -80,13 +80,13 @@ describe('dependency-installer', () => {
           '@testing-library/react': '^14.0.0',
           '@testing-library/jest-dom': '^6.0.0',
           '@testing-library/user-event': '^14.0.0',
-          jsdom: '^25.0.0'
+          jsdom: '^25.0.0',
         }
         mockReadFile.mockResolvedValue(JSON.stringify(mockPackageJson, null, 2))
 
-        const installer = new DependencyInstaller(mockProjectInfo, { 
+        const installer = new DependencyInstaller(mockProjectInfo, {
           incremental: true,
-          verbose: true 
+          verbose: true,
         })
         const result = await installer.installDependencies()
 
@@ -95,9 +95,9 @@ describe('dependency-installer', () => {
       })
 
       it('should create backup when requested', async () => {
-        const installer = new DependencyInstaller(mockProjectInfo, { 
+        const installer = new DependencyInstaller(mockProjectInfo, {
           backup: true,
-          verbose: true 
+          verbose: true,
         })
         await installer.installDependencies()
 
@@ -109,9 +109,9 @@ describe('dependency-installer', () => {
       })
 
       it('should handle dry run mode', async () => {
-        const installer = new DependencyInstaller(mockProjectInfo, { 
+        const installer = new DependencyInstaller(mockProjectInfo, {
           dryRun: true,
-          verbose: true 
+          verbose: true,
         })
         const result = await installer.installDependencies()
 
@@ -133,9 +133,8 @@ describe('dependency-installer', () => {
               name: 'sub-package',
               path: '/test/project/packages/sub-package',
               packageJson: mockPackageJson,
-
-            }
-          }
+            },
+          },
         }
 
         const installer = new DependencyInstaller(workspaceProjectInfo, { verbose: true })
@@ -160,35 +159,31 @@ describe('dependency-installer', () => {
               name: 'sub-package',
               path: '/test/project/packages/sub-package',
               packageJson: mockPackageJson,
-
-            }
-          }
+            },
+          },
         }
 
-        const installer = new DependencyInstaller(workspaceProjectInfo, { 
+        const installer = new DependencyInstaller(workspaceProjectInfo, {
           workspaceRoot: true,
-          verbose: true 
+          verbose: true,
         })
         await installer.installDependencies()
 
-        expect(mockReadFile).toHaveBeenCalledWith(
-          '/test/project/package.json',
-          'utf-8'
-        )
+        expect(mockReadFile).toHaveBeenCalledWith('/test/project/package.json', 'utf-8')
       })
 
       it('should handle installation failures with rollback', async () => {
         mockExeca.mockRejectedValue(new Error('Installation failed'))
 
-        const installer = new DependencyInstaller(mockProjectInfo, { 
+        const installer = new DependencyInstaller(mockProjectInfo, {
           backup: true,
-          verbose: true 
+          verbose: true,
         })
         const result = await installer.installDependencies()
 
         expect(result.success).toBe(false)
         expect(result.error).toContain('Failed to install dependencies')
-        
+
         // Should attempt rollback
         expect(mockWriteFile).toHaveBeenCalledTimes(2) // backup + rollback
       })
@@ -238,50 +233,58 @@ describe('dependency-installer', () => {
 
         expect(result.success).toBe(true)
         // Should include @types packages
-        const installCall = mockExeca.mock.calls.find(call => 
-          Array.isArray(call[1]) && call[1].some((arg: any) => typeof arg === 'string' && arg.includes('@types'))
+        const installCall = mockExeca.mock.calls.find(
+          (call) =>
+            Array.isArray(call[1]) &&
+            call[1].some((arg: any) => typeof arg === 'string' && arg.includes('@types'))
         )
         expect(installCall).toBeDefined()
       })
 
       it('should handle Vue 2 projects correctly', async () => {
-        const vue2ProjectInfo = { 
-          ...mockProjectInfo, 
+        const vue2ProjectInfo = {
+          ...mockProjectInfo,
           techStack: 'vue2' as const,
-          dependencyVersions: { vue: '^2.7.0' }
+          dependencyVersions: { vue: '^2.7.0' },
         }
         const installer = new DependencyInstaller(vue2ProjectInfo, { verbose: true })
         const result = await installer.installDependencies()
 
         expect(result.success).toBe(true)
         // Should include Vue 2 specific dependencies
-        const installCall = mockExeca.mock.calls.find(call => 
-          Array.isArray(call[1]) && call[1].some((arg: any) => typeof arg === 'string' && arg.includes('vue-template-compiler'))
+        const installCall = mockExeca.mock.calls.find(
+          (call) =>
+            Array.isArray(call[1]) &&
+            call[1].some(
+              (arg: any) => typeof arg === 'string' && arg.includes('vue-template-compiler')
+            )
         )
         expect(installCall).toBeDefined()
       })
 
       it('should handle Vue 3 projects correctly', async () => {
-        const vue3ProjectInfo = { 
-          ...mockProjectInfo, 
+        const vue3ProjectInfo = {
+          ...mockProjectInfo,
           techStack: 'vue3' as const,
-          dependencyVersions: { vue: '^3.3.0' }
+          dependencyVersions: { vue: '^3.3.0' },
         }
         const installer = new DependencyInstaller(vue3ProjectInfo, { verbose: true })
         const result = await installer.installDependencies()
 
         expect(result.success).toBe(true)
         // Should include Vue 3 specific dependencies
-        const installCall = mockExeca.mock.calls.find(call => 
-          Array.isArray(call[1]) && call[1].some((arg: any) => typeof arg === 'string' && arg.includes('@vue/test-utils'))
+        const installCall = mockExeca.mock.calls.find(
+          (call) =>
+            Array.isArray(call[1]) &&
+            call[1].some((arg: any) => typeof arg === 'string' && arg.includes('@vue/test-utils'))
         )
         expect(installCall).toBeDefined()
       })
 
       it('should add -w flag for pnpm workspace root installations', async () => {
         // Test pnpm workspace root
-        const pnpmWorkspaceProjectInfo = { 
-          ...mockProjectInfo, 
+        const pnpmWorkspaceProjectInfo = {
+          ...mockProjectInfo,
           packageManager: 'pnpm' as const,
           hasWorkspace: true,
           currentDir: '/test/project',
@@ -291,10 +294,10 @@ describe('dependency-installer', () => {
             packages: [],
             rootPackageJson: {},
             currentLocation: 'root' as const,
-            currentPackage: undefined
-          }
+            currentPackage: undefined,
+          },
         }
-        
+
         const installer = new DependencyInstaller(pnpmWorkspaceProjectInfo)
         await installer.installDependencies()
 
@@ -307,7 +310,7 @@ describe('dependency-installer', () => {
         vi.clearAllMocks()
 
         // Test pnpm workspace package (should not add -w)
-        const pnpmPackageProjectInfo = { 
+        const pnpmPackageProjectInfo = {
           ...pnpmWorkspaceProjectInfo,
           currentDir: '/test/project/packages/app',
           workspaceInfo: {
@@ -316,11 +319,11 @@ describe('dependency-installer', () => {
             currentPackage: {
               name: 'app',
               path: 'packages/app',
-              packageJson: {}
-            }
-          }
+              packageJson: {},
+            },
+          },
         }
-        
+
         const packageInstaller = new DependencyInstaller(pnpmPackageProjectInfo)
         await packageInstaller.installDependencies()
 
@@ -337,16 +340,16 @@ describe('dependency-installer', () => {
       })
 
       it('should cleanup backup file after successful installation', async () => {
-        const installer = new DependencyInstaller(mockProjectInfo, { 
+        const installer = new DependencyInstaller(mockProjectInfo, {
           backup: true,
-          verbose: true 
+          verbose: true,
         })
-        
+
         // Mock fs unlink for cleanup
         const mockUnlink = vi.fn().mockResolvedValue(undefined)
         vi.doMock('node:fs/promises', async () => ({
           ...(await vi.importActual('node:fs/promises')),
-          unlink: mockUnlink
+          unlink: mockUnlink,
         }))
 
         await installer.installDependencies()
@@ -369,14 +372,14 @@ describe('dependency-installer', () => {
         const packageJsonWithoutScripts = {
           ...mockPackageJson,
           scripts: {
-            'build': 'tsc'
-          }
+            build: 'tsc',
+          },
         }
-        
+
         mockReadFile
           .mockResolvedValueOnce(JSON.stringify(packageJsonWithoutScripts, null, 2)) // Initial read
           .mockResolvedValueOnce(JSON.stringify(packageJsonWithoutScripts, null, 2)) // For addTestScripts
-        
+
         const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
         await installer.installDependencies()
 
@@ -403,23 +406,26 @@ describe('dependency-installer', () => {
         const packageJsonWithTestScript = {
           ...mockPackageJson,
           scripts: {
-            'test': 'jest',
-            'build': 'tsc'
-          }
+            test: 'jest',
+            build: 'tsc',
+          },
         }
-        
+
         mockReadFile
           .mockResolvedValueOnce(JSON.stringify(packageJsonWithTestScript, null, 2)) // Initial read
           .mockResolvedValueOnce(JSON.stringify(packageJsonWithTestScript, null, 2)) // For addTestScripts
-        
+
         const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
         await installer.installDependencies()
 
         // Should not overwrite existing test script
-        const packageJsonCalls = mockWriteFile.mock.calls.filter(call => 
-          typeof call[0] === 'string' && call[0].includes('package.json') && !call[0].includes('backup')
+        const packageJsonCalls = mockWriteFile.mock.calls.filter(
+          (call) =>
+            typeof call[0] === 'string' &&
+            call[0].includes('package.json') &&
+            !call[0].includes('backup')
         )
-        
+
         if (packageJsonCalls.length > 0) {
           const finalPackageJson = packageJsonCalls[packageJsonCalls.length - 1]?.[1]
           expect(finalPackageJson).toContain('"test": "jest"') // Original preserved
@@ -429,7 +435,7 @@ describe('dependency-installer', () => {
 
       it('should display dependencies to install before installation', async () => {
         const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        
+
         const installer = new DependencyInstaller(mockProjectInfo, { verbose: true })
         await installer.installDependencies()
 
@@ -437,7 +443,7 @@ describe('dependency-installer', () => {
         expect(consoleSpy).toHaveBeenCalledWith('\n📦 准备安装以下依赖:')
         expect(consoleSpy).toHaveBeenCalledWith('\n🛠️  开发依赖:')
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringMatching(/总计: \d+ 个依赖/))
-        
+
         consoleSpy.mockRestore()
       })
     })
@@ -446,14 +452,14 @@ describe('dependency-installer', () => {
   describe('installDependencies (legacy function)', () => {
     it('should work with existing interface', async () => {
       const options: ModuleOptions = { verbose: true }
-      
+
       await expect(installDependencies(mockProjectInfo, options)).resolves.not.toThrow()
       expect(mockExeca).toHaveBeenCalled()
     })
 
     it('should handle dry run mode', async () => {
       const options: ModuleOptions = { dryRun: true, verbose: true }
-      
+
       await installDependencies(mockProjectInfo, options)
       expect(mockExeca).not.toHaveBeenCalled()
     })
@@ -461,7 +467,7 @@ describe('dependency-installer', () => {
     it('should throw on installation failure', async () => {
       mockExeca.mockRejectedValue(new Error('Installation failed'))
       const options: ModuleOptions = { verbose: true }
-      
+
       await expect(installDependencies(mockProjectInfo, options)).rejects.toThrow()
     })
   })

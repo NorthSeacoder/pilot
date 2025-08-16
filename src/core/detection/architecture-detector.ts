@@ -37,7 +37,7 @@ export async function detectArchitecture(rootDir: string): Promise<ProjectArchit
  * 检测工作区信息
  */
 export async function detectWorkspaceInfo(
-  rootDir: string, 
+  rootDir: string,
   currentDir: string,
   architecture: ProjectArchitecture
 ): Promise<WorkspaceInfo | undefined> {
@@ -64,9 +64,7 @@ export async function detectWorkspaceInfo(
   let currentPackage: WorkspacePackage | undefined
 
   if (currentLocation === 'package') {
-    currentPackage = packages.find(pkg => 
-      currentDir.startsWith(path.join(rootDir, pkg.path))
-    )
+    currentPackage = packages.find((pkg) => currentDir.startsWith(path.join(rootDir, pkg.path)))
   }
 
   return {
@@ -88,8 +86,8 @@ async function detectWorkspacePackagesFromPatterns(
   const packages: WorkspacePackage[] = []
 
   for (const pattern of patterns) {
-    const packageDirs = await glob(pattern, { 
-      cwd: rootDir
+    const packageDirs = await glob(pattern, {
+      cwd: rootDir,
     })
 
     for (const dir of packageDirs) {
@@ -97,11 +95,11 @@ async function detectWorkspacePackagesFromPatterns(
       if (await pathExists(packageJsonPath)) {
         const content = await safeReadFile(packageJsonPath)
         if (content) {
-          const packageJson = safeParseJSON(content, { 
-            operation: '工作区包检测', 
-            filePath: packageJsonPath 
+          const packageJson = safeParseJSON(content, {
+            operation: '工作区包检测',
+            filePath: packageJsonPath,
           })
-          
+
           if (packageJson) {
             packages.push({
               name: packageJson.name || path.basename(dir),
@@ -122,7 +120,7 @@ async function detectWorkspacePackagesFromPatterns(
  */
 async function detectPnpmWorkspacePackages(rootDir: string): Promise<WorkspacePackage[]> {
   const pnpmWorkspacePath = path.join(rootDir, 'pnpm-workspace.yaml')
-  
+
   const content = await safeReadFile(pnpmWorkspacePath)
   if (content) {
     const config = safeAsync(
@@ -130,13 +128,13 @@ async function detectPnpmWorkspacePackages(rootDir: string): Promise<WorkspacePa
       { operation: 'pnpm-workspace.yaml解析', filePath: pnpmWorkspacePath },
       {}
     )
-    
+
     const configData = await config
     const patterns = configData.packages || []
-    
+
     return await detectWorkspacePackagesFromPatterns(rootDir, patterns)
   }
-  
+
   return []
 }
 
@@ -144,7 +142,7 @@ async function detectPnpmWorkspacePackages(rootDir: string): Promise<WorkspacePa
  * 检测 yarn workspace 包
  */
 async function detectYarnWorkspacePackages(
-  rootDir: string, 
+  rootDir: string,
   workspaces: string[] | { packages: string[] }
 ): Promise<WorkspacePackage[]> {
   const patterns = Array.isArray(workspaces) ? workspaces : workspaces.packages || []

@@ -17,27 +17,27 @@ describe('TypeScript Detection', () => {
   describe('detectTypeScript', () => {
     it('应该通过 typescript 依赖检测 TypeScript 项目', async () => {
       const packageJson = {
-        devDependencies: { typescript: '^5.0.0' }
+        devDependencies: { typescript: '^5.0.0' },
       }
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
     })
 
     it('应该通过 @types/node 依赖检测 TypeScript 项目', async () => {
       const packageJson = {
-        devDependencies: { '@types/node': '^20.0.0' }
+        devDependencies: { '@types/node': '^20.0.0' },
       }
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
     })
 
     it('应该检查生产依赖中的 TypeScript', async () => {
       const packageJson = {
-        dependencies: { typescript: '^5.0.0' }
+        dependencies: { typescript: '^5.0.0' },
       }
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
     })
@@ -47,7 +47,7 @@ describe('TypeScript Detection', () => {
       vi.mocked(pathExists).mockResolvedValue(true as any)
 
       const packageJson = {}
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
       expect(pathExists).toHaveBeenCalledWith('/test/project/tsconfig.json')
@@ -60,7 +60,7 @@ describe('TypeScript Detection', () => {
       })
 
       const packageJson = {}
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
     })
@@ -72,7 +72,7 @@ describe('TypeScript Detection', () => {
       })
 
       const packageJson = {}
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
     })
@@ -82,7 +82,7 @@ describe('TypeScript Detection', () => {
       vi.mocked(pathExists).mockResolvedValue(false as any)
 
       const packageJson = {}
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(false)
     })
@@ -90,11 +90,11 @@ describe('TypeScript Detection', () => {
     it('应该优先检查依赖而不是文件系统', async () => {
       const { pathExists } = await import('fs-extra')
       // 不调用 pathExists，因为依赖检查应该先命中
-      
+
       const packageJson = {
-        devDependencies: { typescript: '^5.0.0' }
+        devDependencies: { typescript: '^5.0.0' },
       }
-      
+
       const result = await detectTypeScript('/test/project', packageJson)
       expect(result).toBe(true)
       expect(pathExists).not.toHaveBeenCalled()
@@ -105,19 +105,19 @@ describe('TypeScript Detection', () => {
     it('应该读取并解析 tsconfig.json', async () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile, safeParseJSON } = await import('../../utils/error-handler')
-      
+
       vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue('{"compilerOptions": {"strict": true}}')
       vi.mocked(safeParseJSON).mockReturnValue({ compilerOptions: { strict: true } })
 
       const result = await getTypeScriptConfig('/test/project')
-      
+
       expect(pathExists).toHaveBeenCalledWith('/test/project/tsconfig.json')
       expect(safeReadFile).toHaveBeenCalledWith('/test/project/tsconfig.json')
-      expect(safeParseJSON).toHaveBeenCalledWith(
-        '{"compilerOptions": {"strict": true}}',
-        { operation: 'TypeScript配置解析', filePath: '/test/project/tsconfig.json' }
-      )
+      expect(safeParseJSON).toHaveBeenCalledWith('{"compilerOptions": {"strict": true}}', {
+        operation: 'TypeScript配置解析',
+        filePath: '/test/project/tsconfig.json',
+      })
       expect(result).toEqual({ compilerOptions: { strict: true } })
     })
 
@@ -126,32 +126,32 @@ describe('TypeScript Detection', () => {
       vi.mocked(pathExists).mockResolvedValue(false as any)
 
       const result = await getTypeScriptConfig('/test/project')
-      
+
       expect(result).toBe(null)
     })
 
     it('当文件读取失败时应该返回 null', async () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile } = await import('../../utils/error-handler')
-      
+
       vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue(null)
 
       const result = await getTypeScriptConfig('/test/project')
-      
+
       expect(result).toBe(null)
     })
 
     it('当 JSON 解析失败时应该返回 null', async () => {
       const { pathExists } = await import('fs-extra')
       const { safeReadFile, safeParseJSON } = await import('../../utils/error-handler')
-      
+
       vi.mocked(pathExists).mockResolvedValue(true as any)
       vi.mocked(safeReadFile).mockResolvedValue('invalid json')
       vi.mocked(safeParseJSON).mockReturnValue(null)
 
       const result = await getTypeScriptConfig('/test/project')
-      
+
       expect(result).toBe(null)
     })
   })

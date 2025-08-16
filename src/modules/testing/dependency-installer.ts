@@ -69,7 +69,7 @@ export class DependencyInstaller {
       // 分析项目依赖
       const packageJsonPath = this.getPackageJsonPath()
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'))
-      
+
       const analysis = await analyzeProjectDependenciesV2(
         packageJson,
         this.projectInfo.techStack,
@@ -81,7 +81,7 @@ export class DependencyInstaller {
       if (analysis.conflicts.hasConflicts) {
         if (this.options.verbose) {
           console.log('检测到依赖冲突:')
-          analysis.conflicts.conflicts.forEach(conflict => {
+          analysis.conflicts.conflicts.forEach((conflict) => {
             console.log(`  - ${conflict.dependency}: ${conflict.description}`)
           })
         }
@@ -93,7 +93,9 @@ export class DependencyInstaller {
         : analysis.recommendations
 
       const skippedDependencies = this.options.incremental
-        ? analysis.recommendations.filter(dep => analysis.existingDependencies[dep.name]).map(dep => dep.name)
+        ? analysis.recommendations
+            .filter((dep) => analysis.existingDependencies[dep.name])
+            .map((dep) => dep.name)
         : []
 
       if (dependenciesToInstall.length === 0) {
@@ -101,7 +103,7 @@ export class DependencyInstaller {
           success: true,
           installed: [],
           skipped: skippedDependencies,
-          failed: []
+          failed: [],
         }
       }
 
@@ -118,20 +120,19 @@ export class DependencyInstaller {
       // 执行安装
       const installResult = await this.executeInstallation(dependenciesToInstall)
       installResult.skipped = skippedDependencies
-      
+
       // 如果安装成功，执行后续优化
       if (installResult.success) {
         // 添加测试脚本到 package.json
         await this.addTestScripts()
-        
+
         // 清理备份文件
         if (this.backupInfo) {
           await this.cleanupBackup()
         }
       }
-      
-      return installResult
 
+      return installResult
     } catch (error) {
       // 安装失败时回滚
       if (this.backupInfo) {
@@ -144,7 +145,7 @@ export class DependencyInstaller {
         installed: [],
         skipped: [],
         failed: [],
-        error: errorMessage
+        error: errorMessage,
       }
     }
   }
@@ -159,8 +160,10 @@ export class DependencyInstaller {
     }
 
     // 如果在工作区子项目中执行，使用当前目录的 package.json
-    if (this.projectInfo.workspaceInfo?.currentLocation === 'package' && 
-        this.projectInfo.workspaceInfo.currentPackage) {
+    if (
+      this.projectInfo.workspaceInfo?.currentLocation === 'package' &&
+      this.projectInfo.workspaceInfo.currentPackage
+    ) {
       return path.join(this.projectInfo.workspaceInfo.currentPackage.path, 'package.json')
     }
 
@@ -175,7 +178,7 @@ export class DependencyInstaller {
     recommendations: DependencySpec[],
     existingDependencies: Record<string, string>
   ): DependencySpec[] {
-    return recommendations.filter(dep => !existingDependencies[dep.name])
+    return recommendations.filter((dep) => !existingDependencies[dep.name])
   }
 
   /**
@@ -184,13 +187,13 @@ export class DependencyInstaller {
   private async createBackup(packageJsonPath: string, packageJson: any): Promise<void> {
     const backupPath = `${packageJsonPath}.backup.${Date.now()}`
     const originalContent = JSON.stringify(packageJson, null, 2)
-    
+
     await writeFile(backupPath, originalContent, 'utf-8')
-    
+
     this.backupInfo = {
       packageJsonPath,
       backupPath,
-      originalContent
+      originalContent,
     }
 
     if (this.options.verbose) {
@@ -202,20 +205,21 @@ export class DependencyInstaller {
    * 预览安装
    */
   private previewInstallation(dependencies: DependencySpec[]): InstallResult {
-    if (this.options.verbose) {
-      console.log('预览模式 - 将要安装的依赖:')
-      dependencies.forEach(dep => {
+    // 在 verbose 模式或者有依赖需要安装时显示依赖列表
+    if (this.options.verbose || dependencies.length > 0) {
+      console.log('\n📦 将要安装的测试依赖:')
+      dependencies.forEach((dep) => {
         const version = dep.version ? `@${dep.version}` : ''
-        const type = dep.dev ? ' (dev)' : ''
-        console.log(`  - ${dep.name}${version}${type}`)
+        const type = dep.dev ? ' (开发依赖)' : ' (生产依赖)'
+        console.log(`    - ${dep.name}${version}${type}`)
       })
     }
 
     return {
       success: true,
-      installed: dependencies.map(dep => dep.name),
+      installed: dependencies.map((dep) => dep.name),
       skipped: [],
-      failed: []
+      failed: [],
     }
   }
 
@@ -227,52 +231,47 @@ export class DependencyInstaller {
       success: true,
       installed: [],
       skipped: [],
-      failed: []
+      failed: [],
     }
 
     // 显示将要安装的依赖列表
     this.displayDependenciesToInstall(dependencies)
 
     // 按类型分组依赖
-    const devDeps = dependencies.filter(dep => dep.dev)
-    const prodDeps = dependencies.filter(dep => !dep.dev)
+    const devDeps = dependencies.filter((dep) => dep.dev)
+    const prodDeps = dependencies.filter((dep) => !dep.dev)
 
-    try {
-      // 安装生产依赖
-      if (prodDeps.length > 0) {
-        console.log('🔧 正在安装生产依赖...')
-        const result = await this.installDependencyGroup(prodDeps, false)
-        installResult.installed.push(...result.installed)
-        installResult.failed.push(...result.failed)
-        if (result.installed.length > 0) {
-          console.log(`✅ 生产依赖安装完成 (${result.installed.length}/${prodDeps.length})`)
-        }
+    // 安装生产依赖
+    if (prodDeps.length > 0) {
+      console.log('🔧 正在安装生产依赖...')
+      const result = await this.installDependencyGroup(prodDeps, false)
+      installResult.installed.push(...result.installed)
+      installResult.failed.push(...result.failed)
+      if (result.installed.length > 0) {
+        console.log(`✅ 生产依赖安装完成 (${result.installed.length}/${prodDeps.length})`)
       }
-
-      // 安装开发依赖
-      if (devDeps.length > 0) {
-        console.log('🛠️  正在安装开发依赖...')
-        const result = await this.installDependencyGroup(devDeps, true)
-        installResult.installed.push(...result.installed)
-        installResult.failed.push(...result.failed)
-        if (result.installed.length > 0) {
-          console.log(`✅ 开发依赖安装完成 (${result.installed.length}/${devDeps.length})`)
-        }
-      }
-
-      installResult.success = installResult.failed.length === 0
-      installResult.backupPath = this.backupInfo?.backupPath
-
-      // 如果有失败的依赖，抛出错误
-      if (installResult.failed.length > 0) {
-        throw new Error(`Failed to install dependencies: ${installResult.failed.join(', ')}`)
-      }
-
-      return installResult
-    } catch (error) {
-      // 重新抛出错误，让上层处理
-      throw error
     }
+
+    // 安装开发依赖
+    if (devDeps.length > 0) {
+      console.log('🛠️  正在安装开发依赖...')
+      const result = await this.installDependencyGroup(devDeps, true)
+      installResult.installed.push(...result.installed)
+      installResult.failed.push(...result.failed)
+      if (result.installed.length > 0) {
+        console.log(`✅ 开发依赖安装完成 (${result.installed.length}/${devDeps.length})`)
+      }
+    }
+
+    installResult.success = installResult.failed.length === 0
+    installResult.backupPath = this.backupInfo?.backupPath
+
+    // 如果有失败的依赖，抛出错误
+    if (installResult.failed.length > 0) {
+      throw new Error(`Failed to install dependencies: ${installResult.failed.join(', ')}`)
+    }
+
+    return installResult
   }
 
   /**
@@ -287,10 +286,10 @@ export class DependencyInstaller {
 
     try {
       const installCommand = this.getInstallCommand(isDev)
-      const depStrings = dependencies.map(dep => 
+      const depStrings = dependencies.map((dep) =>
         dep.version ? `${dep.name}@${dep.version}` : dep.name
       )
-      
+
       const args = [...installCommand, ...depStrings]
       const cwd = path.dirname(this.getPackageJsonPath())
 
@@ -308,13 +307,12 @@ export class DependencyInstaller {
         stdio: this.options.verbose ? 'inherit' : 'pipe',
       })
 
-      installed.push(...dependencies.map(dep => dep.name))
-
+      installed.push(...dependencies.map((dep) => dep.name))
     } catch (error) {
       if (this.options.verbose) {
         console.error('安装失败:', error)
       }
-      failed.push(...dependencies.map(dep => dep.name))
+      failed.push(...dependencies.map((dep) => dep.name))
     }
 
     return { installed, failed }
@@ -330,7 +328,7 @@ export class DependencyInstaller {
 
     try {
       await writeFile(this.backupInfo.packageJsonPath, this.backupInfo.originalContent, 'utf-8')
-      
+
       if (this.options.verbose) {
         console.log(`已回滚到备份: ${this.backupInfo.backupPath}`)
       }
@@ -352,11 +350,11 @@ export class DependencyInstaller {
     try {
       const { unlink } = await import('node:fs/promises')
       await unlink(this.backupInfo.backupPath)
-      
+
       if (this.options.verbose) {
         console.log(`已清理备份文件: ${this.backupInfo.backupPath}`)
       }
-      
+
       // 清理备份信息
       this.backupInfo = undefined
     } catch (error) {
@@ -375,27 +373,27 @@ export class DependencyInstaller {
     }
 
     console.log('\n📦 准备安装以下依赖:')
-    
+
     // 按类型分组显示
-    const devDeps = dependencies.filter(dep => dep.dev)
-    const prodDeps = dependencies.filter(dep => !dep.dev)
-    
+    const devDeps = dependencies.filter((dep) => dep.dev)
+    const prodDeps = dependencies.filter((dep) => !dep.dev)
+
     if (prodDeps.length > 0) {
       console.log('\n🔧 生产依赖:')
-      prodDeps.forEach(dep => {
+      prodDeps.forEach((dep) => {
         const version = dep.version ? `@${dep.version}` : ''
         console.log(`  • ${dep.name}${version}`)
       })
     }
-    
+
     if (devDeps.length > 0) {
       console.log('\n🛠️  开发依赖:')
-      devDeps.forEach(dep => {
+      devDeps.forEach((dep) => {
         const version = dep.version ? `@${dep.version}` : ''
         console.log(`  • ${dep.name}${version}`)
       })
     }
-    
+
     console.log(`\n总计: ${dependencies.length} 个依赖\n`)
   }
 
@@ -406,27 +404,27 @@ export class DependencyInstaller {
     try {
       const packageJsonPath = this.getPackageJsonPath()
       const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'))
-      
+
       // 确保 scripts 对象存在
       if (!packageJson.scripts) {
         packageJson.scripts = {}
       }
-      
+
       // 定义要添加的测试脚本
       const testScripts = {
-        'test': 'vitest',
+        test: 'vitest',
         'test:ui': 'vitest --ui',
-        'test:coverage': 'vitest --coverage'
+        'test:coverage': 'vitest --coverage',
       }
-      
+
       let hasNewScripts = false
-      
+
       // 智能添加脚本，避免覆盖现有脚本
       for (const [scriptName, scriptCommand] of Object.entries(testScripts)) {
         if (!packageJson.scripts[scriptName]) {
           packageJson.scripts[scriptName] = scriptCommand
           hasNewScripts = true
-          
+
           if (this.options.verbose) {
             console.log(`✅ 添加测试脚本: "${scriptName}": "${scriptCommand}"`)
           }
@@ -434,18 +432,17 @@ export class DependencyInstaller {
           console.log(`⏭️  跳过已存在的脚本: "${scriptName}"`)
         }
       }
-      
+
       // 如果有新脚本，保存到文件
       if (hasNewScripts) {
         await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf-8')
-        
+
         if (this.options.verbose) {
           console.log('📝 测试脚本已添加到 package.json')
         }
       } else if (this.options.verbose) {
         console.log('📝 所有测试脚本已存在，无需添加')
       }
-      
     } catch (error) {
       if (this.options.verbose) {
         console.warn(`添加测试脚本失败: ${error}`)
@@ -458,12 +455,12 @@ export class DependencyInstaller {
    */
   private isWorkspaceRoot(): boolean {
     const { workspaceInfo, currentDir, rootDir, hasWorkspace } = this.projectInfo
-    
+
     // 如果没有工作区，不是工作区项目
     if (!hasWorkspace || !workspaceInfo) {
       return false
     }
-    
+
     // 检查当前是否在工作区根目录
     // 无论currentLocation是什么，只要currentDir等于rootDir就是在根目录
     return currentDir === rootDir
@@ -474,15 +471,16 @@ export class DependencyInstaller {
    */
   private getInstallCommand(isDev: boolean): string[] {
     const { packageManager } = this.projectInfo
-    
+
     switch (packageManager) {
-      case 'pnpm':
+      case 'pnpm': {
         const pnpmCmd = isDev ? ['pnpm', 'add', '-D'] : ['pnpm', 'add']
         // 如果在pnpm工作区根目录，添加 -w 标志
         if (this.isWorkspaceRoot()) {
           pnpmCmd.push('-w')
         }
         return pnpmCmd
+      }
       case 'yarn':
         return isDev ? ['yarn', 'add', '--dev'] : ['yarn', 'add']
       case 'npm':
@@ -503,11 +501,11 @@ export async function installDependencies(
     incremental: true,
     backup: true,
     verbose: options.verbose,
-    dryRun: options.dryRun
+    dryRun: options.dryRun,
   })
 
   const result = await installer.installDependencies()
-  
+
   if (!result.success) {
     throw new Error(result.error || '依赖安装失败')
   }

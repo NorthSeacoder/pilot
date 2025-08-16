@@ -220,7 +220,11 @@ export interface PilotOptions {
 /**
  * 配置冲突类型
  */
-export type ConflictType = 'config-exists' | 'dependency-mismatch' | 'setup-conflict' | 'version-incompatible'
+export type ConflictType =
+  | 'config-exists'
+  | 'dependency-mismatch'
+  | 'setup-conflict'
+  | 'version-incompatible'
 
 /**
  * 冲突严重程度

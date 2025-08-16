@@ -48,13 +48,13 @@ export async function detectTypeScript(currentDir: string, packageJson: any): Pr
  */
 export async function getTypeScriptConfig(currentDir: string): Promise<any | null> {
   const tsconfigPath = path.join(currentDir, 'tsconfig.json')
-  
+
   if (await pathExists(tsconfigPath)) {
     const content = await safeReadFile(tsconfigPath)
     if (content) {
-      return safeParseJSON(content, { 
-        operation: 'TypeScript配置解析', 
-        filePath: tsconfigPath 
+      return safeParseJSON(content, {
+        operation: 'TypeScript配置解析',
+        filePath: tsconfigPath,
       })
     }
   }

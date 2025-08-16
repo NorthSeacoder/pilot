@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdtemp, rm, readFile, writeFile, mkdir } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { TestSetupGenerator, generateTestSetup, type TestSetupContext } from './test-setup-generator'
+import {
+  TestSetupGenerator,
+  generateTestSetup,
+  type TestSetupContext,
+} from './test-setup-generator'
 import type { ProjectDetection } from '../../types'
 
 describe('TestSetupGenerator', () => {
@@ -32,13 +36,13 @@ describe('TestSetupGenerator', () => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -64,13 +68,13 @@ describe('TestSetupGenerator', () => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -93,13 +97,13 @@ describe('TestSetupGenerator', () => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -127,14 +131,14 @@ describe('TestSetupGenerator', () => {
           type: 'pnpm',
           packages: [],
           rootPackageJson: {},
-          currentLocation: 'root'
-        }
+          currentLocation: 'root',
+        },
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -145,7 +149,7 @@ describe('TestSetupGenerator', () => {
 
     it('should handle workspace package execution context', async () => {
       const packagePath = join(tempDir, 'packages', 'app')
-      
+
       const projectInfo: ProjectDetection = {
         rootDir: tempDir,
         techStack: 'react',
@@ -167,15 +171,15 @@ describe('TestSetupGenerator', () => {
           currentPackage: {
             name: 'app',
             path: packagePath,
-            packageJson: {}
-          }
-        }
+            packageJson: {},
+          },
+        },
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -208,13 +212,13 @@ afterEach(() => {
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -244,13 +248,13 @@ console.log('Custom setup loaded')`
         dependencyVersions: {},
         existingConfigs: [],
         currentDir: tempDir,
-        nodeVersion: 'v18.17.0'
+        nodeVersion: 'v18.17.0',
       }
 
       const context: TestSetupContext = {
         projectInfo,
         options: { verbose: false },
-        templateVariables: {}
+        templateVariables: {},
       }
 
       const result = await generator.generateSetup(context)
@@ -326,14 +330,14 @@ describe('generateTestSetup (legacy)', () => {
       dependencyVersions: {},
       existingConfigs: [],
       currentDir: tempDir,
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     await generateTestSetup(projectInfo, { verbose: false })
 
     const setupPath = join(tempDir, 'src', 'test-setup.ts')
     const setupContent = await readFile(setupPath, 'utf-8')
-    
+
     expect(setupContent).toContain("import '@testing-library/jest-dom'")
     expect(setupContent).toContain("import { cleanup } from '@testing-library/react'")
     expect(setupContent).toContain('cleanup()')
@@ -363,7 +367,7 @@ afterEach(() => {
       dependencyVersions: {},
       existingConfigs: [],
       currentDir: tempDir,
-      nodeVersion: 'v18.17.0'
+      nodeVersion: 'v18.17.0',
     }
 
     // Should not throw error

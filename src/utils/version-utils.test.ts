@@ -7,7 +7,7 @@ import {
   isVersionCompatible,
   parseVersionRange,
   satisfiesVersionRange,
-  formatVersionString
+  formatVersionString,
 } from './version-utils'
 
 describe('version-utils', () => {
@@ -97,28 +97,28 @@ describe('version-utils', () => {
     it('should parse caret ranges', () => {
       expect(parseVersionRange('^18.2.0')).toEqual({
         type: 'caret',
-        version: '18.2.0'
+        version: '18.2.0',
       })
     })
 
     it('should parse tilde ranges', () => {
       expect(parseVersionRange('~16.14.0')).toEqual({
         type: 'tilde',
-        version: '16.14.0'
+        version: '16.14.0',
       })
     })
 
     it('should parse exact versions', () => {
       expect(parseVersionRange('18.2.0')).toEqual({
         type: 'exact',
-        version: '18.2.0'
+        version: '18.2.0',
       })
     })
 
     it('should parse complex ranges', () => {
       expect(parseVersionRange('>=18.0.0 <19.0.0')).toEqual({
         type: 'range',
-        version: '>=18.0.0 <19.0.0'
+        version: '>=18.0.0 <19.0.0',
       })
     })
   })
