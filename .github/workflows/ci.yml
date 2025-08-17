@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
 
+      - name: Build project
+        run: pnpm run build
+
       - name: Debug environment
         run: |
           echo "=== Environment Debug ==="
@@ -41,6 +44,11 @@ jobs:
           echo "Current directory: $(pwd)"
           echo "Package.json packageManager: $(grep packageManager package.json || echo 'not found')"
           echo "Lockfile version: $(head -3 pnpm-lock.yaml | grep lockfileVersion || echo 'not found')"
+          echo "=== Build Output Check ==="
+          echo "Dist directory contents:"
+          ls -la dist/ || echo "dist directory not found"
+          echo "CLI dist contents:"
+          ls -la dist/cli/ || echo "dist/cli directory not found"
           echo "=== CLI Test ==="
           # 测试 CLI 是否能正常执行
           node bin/pilot.js --version || echo "CLI version failed"
