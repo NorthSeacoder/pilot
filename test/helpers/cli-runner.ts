@@ -67,7 +67,7 @@ export class CLIRunner {
         console.log('Error exitCode:', error.exitCode)
         console.log('=== End Error Debug Info ===')
       }
-      
+
       return {
         stdout: error.stdout || '',
         stderr: error.stderr || error.message,
