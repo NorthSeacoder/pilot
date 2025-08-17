@@ -36,6 +36,18 @@ export class CLIRunner {
         reject: false, // 不要在非零退出码时抛出异常
       })
 
+      // 在 CI 环境中添加调试信息
+      if (process.env.CI && result.exitCode !== 0) {
+        console.log('=== CLI Debug Info ===')
+        console.log('Command:', command)
+        console.log('CWD:', this.cwd)
+        console.log('Args:', args)
+        console.log('Exit Code:', result.exitCode)
+        console.log('Stdout:', result.stdout)
+        console.log('Stderr:', result.stderr)
+        console.log('=== End Debug Info ===')
+      }
+
       return {
         stdout: result.stdout,
         stderr: result.stderr,
@@ -44,6 +56,18 @@ export class CLIRunner {
       }
     } catch (error: any) {
       // 处理执行异常
+      if (process.env.CI) {
+        console.log('=== CLI Error Debug Info ===')
+        console.log('Command:', command)
+        console.log('CWD:', this.cwd)
+        console.log('Args:', args)
+        console.log('Error:', error.message)
+        console.log('Error stdout:', error.stdout)
+        console.log('Error stderr:', error.stderr)
+        console.log('Error exitCode:', error.exitCode)
+        console.log('=== End Error Debug Info ===')
+      }
+      
       return {
         stdout: error.stdout || '',
         stderr: error.stderr || error.message,
