@@ -51,7 +51,7 @@ export class CLIRunner {
       return {
         stdout: result.stdout,
         stderr: result.stderr,
-        exitCode: result.exitCode,
+        exitCode: result.exitCode ?? 1,
         command,
       }
     } catch (error: any) {

@@ -11,7 +11,7 @@ export default defineConfig({
     exclude: ['node_modules', 'dist', 'coverage'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/',
         'dist/',
@@ -21,25 +21,23 @@ export default defineConfig({
         '**/*.config.{js,ts}',
         '**/types/**',
         'bin/**',
-        // 排除不需要测试的文件
+        // 只排除真正不需要测试的文件
         'src/index.ts', // 纯导出文件
         'src/cli/run.ts', // 简单入口文件
         'src/cli/exit-code.ts', // 常量定义
         'src/modules/testing/templates/**', // 模板文件
-        // 排除难以测试的 CLI 交互部分
-        'src/cli/index.ts', // 主 CLI 入口
-        'src/cli/progress-tracker.ts', // UI 交互
-        'src/cli/success-messages.ts', // UI 显示
-        'src/cli/command-registry.ts', // 命令注册
       ],
       thresholds: {
         global: {
-          branches: 70, // 从 75 降到 70
-          functions: 75, // 从 80 降到 75
-          lines: 75, // 从 80 降到 75
-          statements: 75, // 从 80 降到 75
+          branches: 70,
+          functions: 75,
+          lines: 75,
+          statements: 75,
         },
       },
+      // 确保覆盖率数据包含足够的信息
+      all: true,
+      skipFull: false,
     },
     testTimeout: 30000, // E2E 测试需要更长时间
     hookTimeout: 10000,

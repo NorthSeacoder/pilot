@@ -36,28 +36,6 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      - name: Debug environment
-        run: |
-          echo "=== Environment Debug ==="
-          echo "Node version: $(node --version)"
-          echo "pnpm version: $(pnpm --version)"
-          echo "Current directory: $(pwd)"
-          echo "Package.json packageManager: $(grep packageManager package.json || echo 'not found')"
-          echo "Lockfile version: $(head -3 pnpm-lock.yaml | grep lockfileVersion || echo 'not found')"
-          echo "=== Build Output Check ==="
-          echo "Dist directory contents:"
-          ls -la dist/ || echo "dist directory not found"
-          echo "CLI dist contents:"
-          ls -la dist/cli/ || echo "dist/cli directory not found"
-          echo "=== CLI Test ==="
-          # 测试 CLI 是否能正常执行
-          node bin/pilot.js --version || echo "CLI version failed"
-          # 创建测试项目并测试 stack override
-          mkdir -p /tmp/debug-test && cd /tmp/debug-test
-          echo '{"name": "debug-test", "version": "1.0.0"}' > package.json
-          echo "Testing CLI with stack override..."
-          /home/runner/work/pilot/pilot/bin/pilot.js add testing --dry-run --stack react 2>&1 || echo "CLI test failed with exit code $?"
-
       - name: Run all checks
         run: pnpm run ci
 
